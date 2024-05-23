@@ -11,6 +11,8 @@
         public Guid BackpackId { get; set; }
         public Backpack Backpack { get; set; }
         public Guid PlayerId { get; set; }
-        public Equipment EquipmentId { get; set; }
+        public Player Player { get; set; }
+        public Guid EquipmentId { get; set; }
+        public Equipment Equipment { get; set; }
     }
 }
