@@ -176,17 +176,17 @@ namespace DungeonsAndExiles.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Role");
+                    b.ToTable("Roles");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("cd0897c1-f361-4685-bd00-c3d56a0c8290"),
+                            Id = new Guid("70bea77b-2d14-4c96-82b7-93d4f247e8a3"),
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = new Guid("d042eba2-82a8-4c79-9bc9-27a03a3a64c0"),
+                            Id = new Guid("e870d163-142f-410d-9a1d-af7848bbffdf"),
                             Name = "User"
                         });
                 });
@@ -221,27 +221,27 @@ namespace DungeonsAndExiles.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ec997402-6b71-4112-a8b4-a3194ebabd0d"),
+                            Id = new Guid("e3452f60-c1c6-47c0-b228-f9703e5b70e5"),
                             Email = "admin@admin.com",
                             Name = "Admin",
-                            Password = "$2a$10$T/EDg0HHUC3ZZxb0WpDYjuSvdtOkzJYqxVJ4oAebI1US7PWmGS0V.",
-                            RoleId = new Guid("cd0897c1-f361-4685-bd00-c3d56a0c8290")
+                            Password = "$2a$10$REC5KOeeCD1WRRF2/x..8u9PDnKyClBVLsNkm55nZkpMP16xt/hWi",
+                            RoleId = new Guid("70bea77b-2d14-4c96-82b7-93d4f247e8a3")
                         },
                         new
                         {
-                            Id = new Guid("5556db48-1b6d-462a-93ab-fb7a12209fd3"),
+                            Id = new Guid("4a4f1ea8-d46f-4347-8513-266ef7b1cfc3"),
                             Email = "john@doe.com",
                             Name = "John",
-                            Password = "$2a$10$ZBTfzq4rzBIdZQW4Af4XPeNwHn6FxRQknLH5/mP3s6v9.w7O2ykvW",
-                            RoleId = new Guid("d042eba2-82a8-4c79-9bc9-27a03a3a64c0")
+                            Password = "$2a$10$b5FV4jt5DRTIFu5FgyuDO.mVgqAqqL5ROCYf8BEIYyKva34OUKA4S",
+                            RoleId = new Guid("e870d163-142f-410d-9a1d-af7848bbffdf")
                         },
                         new
                         {
-                            Id = new Guid("28649b79-c8ac-4b9f-909b-1f01cbd1174f"),
+                            Id = new Guid("0e0e4e3f-7ca6-45c0-a2b0-1dc5080061d5"),
                             Email = "chris@wilson.com",
                             Name = "Chris",
-                            Password = "$2a$10$O20fOAjEjgh3Fr.WEJXy5OR1dBUrtJCRRpLhzUMLby0UdaU.27EgO",
-                            RoleId = new Guid("d042eba2-82a8-4c79-9bc9-27a03a3a64c0")
+                            Password = "$2a$10$QsuCuSnxHWuMgSxuXuasqe1NvQzSfr1CqLeynXEYG5RLs6vUaDIee",
+                            RoleId = new Guid("e870d163-142f-410d-9a1d-af7848bbffdf")
                         });
                 });
 
@@ -308,7 +308,7 @@ namespace DungeonsAndExiles.Api.Migrations
             modelBuilder.Entity("DungeonsAndExiles.Api.Models.Domain.User", b =>
                 {
                     b.HasOne("DungeonsAndExiles.Api.Models.Domain.Role", "Role")
-                        .WithMany("Users")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -333,11 +333,6 @@ namespace DungeonsAndExiles.Api.Migrations
 
                     b.Navigation("Equipment")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DungeonsAndExiles.Api.Models.Domain.Role", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("DungeonsAndExiles.Api.Models.Domain.User", b =>

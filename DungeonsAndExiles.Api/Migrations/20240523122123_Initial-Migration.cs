@@ -26,17 +26,36 @@ namespace DungeonsAndExiles.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -137,6 +156,25 @@ namespace DungeonsAndExiles.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("70bea77b-2d14-4c96-82b7-93d4f247e8a3"), "Admin" },
+                    { new Guid("e870d163-142f-410d-9a1d-af7848bbffdf"), "User" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Email", "Name", "Password", "RoleId" },
+                values: new object[,]
+                {
+                    { new Guid("0e0e4e3f-7ca6-45c0-a2b0-1dc5080061d5"), "chris@wilson.com", "Chris", "$2a$10$QsuCuSnxHWuMgSxuXuasqe1NvQzSfr1CqLeynXEYG5RLs6vUaDIee", new Guid("e870d163-142f-410d-9a1d-af7848bbffdf") },
+                    { new Guid("4a4f1ea8-d46f-4347-8513-266ef7b1cfc3"), "john@doe.com", "John", "$2a$10$b5FV4jt5DRTIFu5FgyuDO.mVgqAqqL5ROCYf8BEIYyKva34OUKA4S", new Guid("e870d163-142f-410d-9a1d-af7848bbffdf") },
+                    { new Guid("e3452f60-c1c6-47c0-b228-f9703e5b70e5"), "admin@admin.com", "Admin", "$2a$10$REC5KOeeCD1WRRF2/x..8u9PDnKyClBVLsNkm55nZkpMP16xt/hWi", new Guid("70bea77b-2d14-4c96-82b7-93d4f247e8a3") }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Backpacks_PlayerId",
                 table: "Backpacks",
@@ -168,6 +206,11 @@ namespace DungeonsAndExiles.Api.Migrations
                 name: "IX_Players_UserId",
                 table: "Players",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_RoleId",
+                table: "Users",
+                column: "RoleId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -189,6 +232,9 @@ namespace DungeonsAndExiles.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
         }
     }
 }

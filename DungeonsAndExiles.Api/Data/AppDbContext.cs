@@ -12,6 +12,7 @@ namespace DungeonsAndExiles.Api.Data
         public virtual DbSet<Monster> Monsters { get; set; }
         public virtual DbSet<Player> Players { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
 
@@ -20,31 +21,32 @@ namespace DungeonsAndExiles.Api.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Player>()
-                .HasOne(b => b.Backpack)
-                .WithOne(p => p.Player)
-                .HasForeignKey<Backpack>(b => b.PlayerId)
+                .HasOne(p => p.Backpack)
+                .WithOne(b => b.Player)
+                .HasForeignKey<Backpack>(b => b.PlayerId) 
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Player>()
-                .HasOne(e => e.Equipment)
-                .WithOne(p => p.Player)
-                .HasForeignKey<Equipment>(e => e.PlayerId)
+                .HasOne(p => p.Equipment)
+                .WithOne(e => e.Player)
+                .HasForeignKey<Equipment>(e => e.PlayerId) 
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
-                .HasMany(b => b.Players)
+                .HasMany(u => u.Players)
                 .WithOne(p => p.User)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Backpack>()
-                .HasMany(i => i.Items)
-                .WithOne(b => b.Backpack)
+                .HasMany(b => b.Items)
+                .WithOne(i => i.Backpack)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Equipment>()
-                .HasMany(i => i.Items)
-                .WithOne(e => e.Equipment)
+                .HasMany(e => e.Items)
+                .WithOne(i => i.Equipment)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
 
             var roles = new List<Role>
