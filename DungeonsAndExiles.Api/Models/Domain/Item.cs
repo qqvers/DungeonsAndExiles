@@ -8,11 +8,7 @@
         public int Damage { get; set; }
         public int Defence { get; set; }
 
-        public Guid BackpackId { get; set; }
-        public Backpack Backpack { get; set; }
-        public Guid PlayerId { get; set; }
-        public Player Player { get; set; }
-        public Guid EquipmentId { get; set; }
-        public Equipment Equipment { get; set; }
+        public List<Backpack> Backpacks { get; set; }
+        public List<Equipment> Equipments { get; set; }
     }
 }

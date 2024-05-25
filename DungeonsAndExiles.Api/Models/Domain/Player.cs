@@ -6,6 +6,8 @@
         public int Health { get; set; }
         public int Damage { get; set; }
         public int Defence { get; set; } 
+        public int Experience { get; set; }
+
         public Guid UserId { get; set; }
         public Guid BackpackId { get; set; }
         public Guid EquipmentId { get; set; }

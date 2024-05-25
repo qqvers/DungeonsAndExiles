@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.DTOs.User;
+using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Models.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (defaultRole == null)
             {
-                throw new InvalidOperationException("Role User not found");
+                throw new NotFoundException("Role User not found");
             }
             newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
             newUser.RoleId = defaultRole.Id;
