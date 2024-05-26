@@ -1,6 +1,10 @@
 ﻿using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Models.Domain;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Data.Repository
 {
@@ -10,17 +14,29 @@ namespace DungeonsAndExiles.Api.Data.Repository
         private readonly IEquipmentRepository _equipmentRepository;
         private readonly AppDbContext _appDbContext;
 
-        public ItemRepository(IBackpackRepository backpackRepository, IEquipmentRepository equipmentRepository)
+        public ItemRepository(
+            AppDbContext appDbContext,
+            IBackpackRepository backpackRepository,
+            IEquipmentRepository equipmentRepository)
         {
+            _appDbContext = appDbContext;
             _backpackRepository = backpackRepository;
             _equipmentRepository = equipmentRepository;
         }
+
         public async Task<Item> GetItemById(Guid itemId)
         {
             var item = await _appDbContext.Items.FindAsync(itemId);
-            if(item == null) { throw new NotFoundException($"Item with ID {itemId} not found"); }
-
+            if (item == null)
+            {
+                throw new NotFoundException($"Item with ID {itemId} not found");
+            }
             return item;
+        }
+
+        public async Task<List<Item>> GetItemList()
+        {
+            return await _appDbContext.Items.ToListAsync();
         }
 
         public async Task<bool> AddItemToBackpack(Guid backpackId, Guid itemId)

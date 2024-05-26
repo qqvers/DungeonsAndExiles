@@ -6,7 +6,7 @@
         public int Capacity {  get; set; }
         public Guid PlayerId { get; set; }
 
-        public List<Item> Items { get; set; }
+        public List<Item> Items { get; set; } = new List<Item>();
         public Player Player { get; set; }
     }
 }

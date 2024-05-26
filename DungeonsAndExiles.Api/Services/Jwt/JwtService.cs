@@ -4,16 +4,16 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace DungeonsAndExiles.Api.Services
+namespace DungeonsAndExiles.Api.Services.Jwt
 {
-    public class JwtService
+    public class JwtService : IJwtService
     {
         private readonly string _secretKey;
         private readonly string _issuer;
 
         public JwtService()
         {
-            Env.Load(); 
+            Env.Load();
             _secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
             _issuer = "DungeonsAndExiles";
         }

@@ -101,7 +101,7 @@ namespace DungeonsAndExiles.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e1de89f7-ac55-45e7-bcf9-fe969f9a4ec3"),
+                            Id = new Guid("94b2338c-4964-479f-bed4-2ccf4c24e878"),
                             Damage = 0,
                             Defence = 5,
                             Name = "Basic Gloves",
@@ -109,7 +109,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("7f6c270c-a2d8-4d94-b66e-a1d10cf910f1"),
+                            Id = new Guid("d974bd95-2e28-4fe6-a1e0-cc34a1a788e0"),
                             Damage = 0,
                             Defence = 10,
                             Name = "Leather Gloves",
@@ -117,7 +117,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("14d02621-e7c6-4533-b071-42283e532607"),
+                            Id = new Guid("31e7b831-d897-43bf-a90a-ae1dbd434630"),
                             Damage = 0,
                             Defence = 15,
                             Name = "Iron Gloves",
@@ -125,7 +125,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("b994235a-a9aa-4171-8921-a93a6d5ddd2f"),
+                            Id = new Guid("2cefec1d-85de-4772-8d0b-4d721cf1f4d2"),
                             Damage = 0,
                             Defence = 20,
                             Name = "Steel Gloves",
@@ -133,7 +133,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("a8b7ae30-9169-41c1-9c80-73a691fcda58"),
+                            Id = new Guid("d062538c-9940-4f00-bea5-d1fb06e9ddc2"),
                             Damage = 0,
                             Defence = 25,
                             Name = "Titanium Gloves",
@@ -141,7 +141,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("4099f361-3bd0-473e-b6e4-f2021d67b26c"),
+                            Id = new Guid("c8afbadd-720a-4109-9a4f-b6732f588427"),
                             Damage = 0,
                             Defence = 5,
                             Name = "Basic Boots",
@@ -149,7 +149,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("2fccc62f-7c29-4fa1-ab67-8e60c110b966"),
+                            Id = new Guid("d80284ce-4dda-4432-b189-a576a1975c01"),
                             Damage = 0,
                             Defence = 10,
                             Name = "Leather Boots",
@@ -157,7 +157,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("bb70a4c9-489b-4940-967e-76ea3b8a9c2d"),
+                            Id = new Guid("8215e5f4-5f9f-49fc-aa30-3827ab6f8e77"),
                             Damage = 0,
                             Defence = 15,
                             Name = "Iron Boots",
@@ -165,7 +165,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("c59c3109-6dd2-450c-acfe-deb2d1e54686"),
+                            Id = new Guid("f3d5727f-45c5-469b-ade2-ed60b47c0e42"),
                             Damage = 0,
                             Defence = 20,
                             Name = "Steel Boots",
@@ -173,7 +173,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("8e466a6f-110e-4973-8365-12833a838200"),
+                            Id = new Guid("dda70cb8-3eea-4f78-80ac-196f6c23a546"),
                             Damage = 0,
                             Defence = 25,
                             Name = "Titanium Boots",
@@ -181,7 +181,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("1e8af1ca-e2c6-4476-bd53-40230e0d0688"),
+                            Id = new Guid("6067f838-d4fd-4578-80b2-9c0323916e77"),
                             Damage = 10,
                             Defence = 0,
                             Name = "Basic Sword",
@@ -189,7 +189,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("abd59e31-25e4-4f03-939e-e20367efd2ed"),
+                            Id = new Guid("7cda34ba-370b-4cf2-8a42-230199636a04"),
                             Damage = 15,
                             Defence = 0,
                             Name = "Iron Sword",
@@ -197,7 +197,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("a039b7f7-2fab-4368-9faf-51094430f514"),
+                            Id = new Guid("a6c507dd-62e9-432e-884f-602838a93a15"),
                             Damage = 20,
                             Defence = 0,
                             Name = "Steel Sword",
@@ -205,7 +205,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("3c9d0328-0b87-46e8-9dba-69d4094daf83"),
+                            Id = new Guid("f432e2fb-25f5-44fd-b9cd-c8de68ef46e2"),
                             Damage = 25,
                             Defence = 0,
                             Name = "Titanium Sword",
@@ -213,7 +213,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9525f977-2877-4843-86d3-70422d00fcf0"),
+                            Id = new Guid("4cc104c7-25ea-4e29-8ca4-b061c1c62880"),
                             Damage = 30,
                             Defence = 0,
                             Name = "Diamond Sword",
@@ -221,7 +221,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("48728490-cc31-44b4-8cc8-36bb3ad8cb68"),
+                            Id = new Guid("84405d79-bcfc-4dd6-ae47-de1aee663791"),
                             Damage = 0,
                             Defence = 5,
                             Name = "Basic Helmet",
@@ -229,7 +229,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("f4909d80-f3a1-4d65-88ad-d5de952df265"),
+                            Id = new Guid("8dfe2d2e-c7ff-4cbd-8340-77a0bbf68fad"),
                             Damage = 0,
                             Defence = 10,
                             Name = "Leather Helmet",
@@ -237,7 +237,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("2f64247e-7355-4177-ad9c-7e2d209cf59e"),
+                            Id = new Guid("e0205c66-f774-46dc-a096-080f8bd8cd5e"),
                             Damage = 0,
                             Defence = 15,
                             Name = "Iron Helmet",
@@ -245,7 +245,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("5a2d11af-ff9b-4967-8210-5a44de70dfe8"),
+                            Id = new Guid("79f1f26f-abb3-47e1-bf4c-398f9247bb3a"),
                             Damage = 0,
                             Defence = 20,
                             Name = "Steel Helmet",
@@ -253,7 +253,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("dd44a08d-ee0d-4551-997c-9f68c9a20de4"),
+                            Id = new Guid("26e626de-d534-460b-b340-c27786f77cad"),
                             Damage = 0,
                             Defence = 25,
                             Name = "Titanium Helmet",
@@ -261,7 +261,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("572d4b5f-f0a5-4841-a2db-9b308b774332"),
+                            Id = new Guid("f4d991ed-cf24-41cd-8d7a-6561797976ee"),
                             Damage = 0,
                             Defence = 10,
                             Name = "Basic Armor",
@@ -269,7 +269,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("0f7fdf98-f115-46e0-a188-3bf93e13f4d5"),
+                            Id = new Guid("a52ee975-52b6-46be-8b27-093a4be5ba7a"),
                             Damage = 0,
                             Defence = 20,
                             Name = "Leather Armor",
@@ -277,7 +277,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("107b0094-b5a2-4749-a2a1-9dc304ee9a40"),
+                            Id = new Guid("a6043ad9-7e4a-4548-9932-8d6068c75ef8"),
                             Damage = 0,
                             Defence = 30,
                             Name = "Iron Armor",
@@ -285,7 +285,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("86f3ea29-6b49-4c7f-8fcc-4906b43b0d37"),
+                            Id = new Guid("5c919272-ba64-4bdc-9dbd-a20c08b5d190"),
                             Damage = 0,
                             Defence = 40,
                             Name = "Steel Armor",
@@ -293,7 +293,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("623a92fd-2d05-487c-9d8a-ddbc89e053c4"),
+                            Id = new Guid("16dcd5a3-af03-4235-a892-a306a9f00e40"),
                             Damage = 0,
                             Defence = 50,
                             Name = "Titanium Armor",
@@ -330,7 +330,7 @@ namespace DungeonsAndExiles.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("69ec19bc-9dea-47f1-b795-fc1eca9859f3"),
+                            Id = new Guid("ed660b52-a502-43ce-9549-c6e5d6ed8072"),
                             Damage = 5,
                             Defence = 1,
                             Health = 30,
@@ -339,7 +339,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("27cf3148-f88a-4bb2-9eb8-a8619c0f605d"),
+                            Id = new Guid("00b39ffb-4694-420a-bd2e-7b9c932d3d4d"),
                             Damage = 10,
                             Defence = 5,
                             Health = 50,
@@ -348,7 +348,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("b7aa4f42-5d07-49a6-9765-f29c1731ff7c"),
+                            Id = new Guid("2c0f2fc1-c93c-4da1-b7b5-687b823be618"),
                             Damage = 20,
                             Defence = 10,
                             Health = 70,
@@ -357,7 +357,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("20e2d81b-69ed-460e-b7ef-59fb5f83c8e0"),
+                            Id = new Guid("54daf5fb-2c39-4931-a8a6-f136ac2c645b"),
                             Damage = 30,
                             Defence = 15,
                             Health = 75,
@@ -366,7 +366,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("8a88dc07-c4d1-4961-823d-01be4c41ea1e"),
+                            Id = new Guid("323ba06b-2ec1-4609-9f23-9d40626d4424"),
                             Damage = 40,
                             Defence = 30,
                             Health = 150,
@@ -375,7 +375,7 @@ namespace DungeonsAndExiles.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("0f1ae3e4-bd52-4506-b907-6d25120742ef"),
+                            Id = new Guid("c6b08855-2d05-47a1-b369-54e045822f65"),
                             Damage = 100,
                             Defence = 50,
                             Health = 300,
@@ -442,12 +442,12 @@ namespace DungeonsAndExiles.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("b357bb36-eeb2-4744-b1a8-4d65faa728ee"),
+                            Id = new Guid("dd65bd59-a483-485f-adde-4eb624ddffc4"),
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = new Guid("2d07e175-36bc-4c0f-af96-aae5e46053e9"),
+                            Id = new Guid("19e0ab0c-8bba-4d4d-a3d2-c5fc258aa8a4"),
                             Name = "User"
                         });
                 });
@@ -482,27 +482,27 @@ namespace DungeonsAndExiles.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("649a6c45-8cd2-4442-b65d-80e72bb9c1a2"),
+                            Id = new Guid("9855d8e0-1756-4ae4-a6aa-8822c9821d5f"),
                             Email = "admin@admin.com",
                             Name = "Admin",
-                            Password = "$2a$10$JGiFivsE2xIHTHkFECH3fux6ZRXikmepbUSr2.y6L8KDwoNVHyGDW",
-                            RoleId = new Guid("b357bb36-eeb2-4744-b1a8-4d65faa728ee")
+                            Password = "$2a$10$bpdj5yy6B7q.FkwWkTL9QO.mA/o/xUEJw5xPOqcwZr6rcwybuxHqe",
+                            RoleId = new Guid("dd65bd59-a483-485f-adde-4eb624ddffc4")
                         },
                         new
                         {
-                            Id = new Guid("07a6368c-57cb-4d02-b313-8839d58804ba"),
+                            Id = new Guid("2d172af7-5f88-4edc-9242-155ec2fc3d75"),
                             Email = "john@doe.com",
                             Name = "John",
-                            Password = "$2a$10$XrOGCpg5LSOHgAmmzCYFwuBJwyY93.cgiHog9GijfQScdSpmGo7DO",
-                            RoleId = new Guid("2d07e175-36bc-4c0f-af96-aae5e46053e9")
+                            Password = "$2a$10$W9uxDkyq2GrVG3EcKJfqw.zDW2Ouip2qGGWIEZ4acMcXGWF/9g2LO",
+                            RoleId = new Guid("19e0ab0c-8bba-4d4d-a3d2-c5fc258aa8a4")
                         },
                         new
                         {
-                            Id = new Guid("f1b0f441-e05e-4096-88cb-aab441cb7030"),
+                            Id = new Guid("211a97a6-f3c1-4544-9fc1-fc7c07ff3af3"),
                             Email = "chris@wilson.com",
                             Name = "Chris",
-                            Password = "$2a$10$0cCd8qZP7VkLnPfNg9DG4uW4UvKVXMsdN7n4/BCkGgGojxjbOlcQa",
-                            RoleId = new Guid("2d07e175-36bc-4c0f-af96-aae5e46053e9")
+                            Password = "$2a$10$sTiKenzm52qe9n18HZg23e/WCfA6HAYSR5eeWJKMkDHIswsdL9VUm",
+                            RoleId = new Guid("19e0ab0c-8bba-4d4d-a3d2-c5fc258aa8a4")
                         });
                 });
 
