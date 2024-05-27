@@ -5,7 +5,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DungeonAndExiles.Tests.Controler
+namespace DungeonsAndExiles.Tests.Controllers
 {
     public class MonstersControllerTests
     {

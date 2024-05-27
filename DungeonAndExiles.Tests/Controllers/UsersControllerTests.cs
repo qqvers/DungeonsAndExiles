@@ -1,14 +1,17 @@
-﻿using DungeonsAndExiles.Api.Controllers;
+﻿using AutoMapper;
+using DungeonsAndExiles.Api.Controllers;
 using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.DTOs.User;
 using DungeonsAndExiles.Api.Models.Domain;
+using DungeonsAndExiles.Api.Models.Profiles;
 using DungeonsAndExiles.Api.Services.Jwt;
+using DungeonsAndExiles.Api.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DungeonAndExiles.Tests.Controller
+namespace DungeonsAndExiles.Tests.Controllers
 {
     public class UsersControllerTests
     {
@@ -16,13 +19,19 @@ namespace DungeonAndExiles.Tests.Controller
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
         private readonly IPlayerRepository _playerRepository;
+        private readonly IMapper _mapper;
 
         public UsersControllerTests()
         {
             _userRepository = A.Fake<IUserRepository>();
             _jwtService = A.Fake<IJwtService>();
             _playerRepository = A.Fake<IPlayerRepository>();
-            _usersController = new UsersController(_userRepository, _jwtService, _playerRepository);
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            _mapper = config.CreateMapper();
+            _usersController = new UsersController(_userRepository, _jwtService, _playerRepository, _mapper);
         }
 
         [Fact]
@@ -32,6 +41,7 @@ namespace DungeonAndExiles.Tests.Controller
             var userRegisterDto = new UserRegisterDto { Email = "test@example.com", Password = "Password123" };
             var user = new User { Id = Guid.NewGuid(), Email = "test@example.com" };
             A.CallTo(() => _userRepository.RegisterUserAsync(userRegisterDto)).Returns(Task.FromResult(user));
+            var userVM = _mapper.Map<UserVM>(user);
 
             // Act
             var result = await _usersController.Create(userRegisterDto);
@@ -39,7 +49,7 @@ namespace DungeonAndExiles.Tests.Controller
             // Assert
             result.Should().BeOfType<CreatedResult>();
             var createdResult = result as CreatedResult;
-            createdResult.Value.Should().Be(user);
+            createdResult.Value.Should().BeEquivalentTo(userVM);
         }
 
         [Fact]
@@ -51,6 +61,7 @@ namespace DungeonAndExiles.Tests.Controller
             var token = "fake-jwt-token";
             A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Returns(Task.FromResult(user));
             A.CallTo(() => _jwtService.GenerateToken(user.Id.ToString())).Returns(token);
+            var userVM = _mapper.Map<UserVM>(user);
 
             // Act
             var result = await _usersController.Login(userLoginDto);
@@ -58,7 +69,7 @@ namespace DungeonAndExiles.Tests.Controller
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().BeEquivalentTo(new { User = user, Token = token });
+            okResult.Value.Should().BeEquivalentTo(new { User = userVM, Token = token });
         }
 
         [Fact]
@@ -101,6 +112,7 @@ namespace DungeonAndExiles.Tests.Controller
             var userId = Guid.NewGuid();
             var user = new User { Id = userId, Email = "test@example.com" };
             A.CallTo(() => _userRepository.FindUserByIdAsync(userId)).Returns(Task.FromResult(user));
+            var userVM = _mapper.Map<UserVM>(user);
 
             // Act
             var result = await _usersController.GetUserById(userId);
@@ -108,7 +120,7 @@ namespace DungeonAndExiles.Tests.Controller
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().Be(user);
+            okResult.Value.Should().BeEquivalentTo(userVM);
         }
 
         [Fact]
@@ -199,6 +211,8 @@ namespace DungeonAndExiles.Tests.Controller
             var playerDto = new PlayerDto { Name = "Player1"};
             var player = new Player { Id = Guid.NewGuid(), Name = "Player1", Level = 1 };
             A.CallTo(() => _playerRepository.CreatePlayerAsync(playerDto, userId)).Returns(Task.FromResult(player));
+            var playerVM = _mapper.Map<PlayerVM>(player);
+
 
             // Act
             var result = await _usersController.CreatePlayer(userId, playerDto);
@@ -206,7 +220,7 @@ namespace DungeonAndExiles.Tests.Controller
             // Assert
             result.Should().BeOfType<CreatedResult>();
             var createdResult = result as CreatedResult;
-            createdResult.Value.Should().Be(player);
+            createdResult.Value.Should().BeEquivalentTo(playerVM);
         }
     }
 }

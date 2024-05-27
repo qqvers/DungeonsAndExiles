@@ -1,26 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using DungeonsAndExiles.Api.Controllers;
 using DungeonsAndExiles.Api.Data.Interfaces;
-using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.Models.Domain;
+using DungeonsAndExiles.Api.Models.Profiles;
+using DungeonsAndExiles.Api.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Xunit;
+using System.Numerics;
 
-namespace DungeonsAndExiles.Api.Tests.Controllers
+namespace DungeonsAndExiles.Tests.Controllers
 {
     public class PlayersControllerTests
     {
         private readonly PlayersController _controller;
         private readonly IPlayerRepository _playerRepository;
+        private readonly IMapper _mapper;
 
         public PlayersControllerTests()
         {
             _playerRepository = A.Fake<IPlayerRepository>();
-            _controller = new PlayersController(_playerRepository);
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            _mapper = config.CreateMapper();
+            _controller = new PlayersController(_playerRepository, _mapper);
         }
 
         [Fact]
@@ -30,13 +35,14 @@ namespace DungeonsAndExiles.Api.Tests.Controllers
             var playerId = Guid.NewGuid();
             var player = new Player { Id = playerId };
             A.CallTo(() => _playerRepository.GetPlayerByIdAsync(playerId)).Returns(Task.FromResult(player));
+            var playerVM = _mapper.Map<PlayerVM>(player);
 
             // Act
             var result = await _controller.GetPlayer(playerId);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().Be(player);
+                .Which.Value.Should().BeEquivalentTo(playerVM);
         }
 
         [Fact]
@@ -45,13 +51,14 @@ namespace DungeonsAndExiles.Api.Tests.Controllers
             // Arrange
             var playersList = new List<Player> { new Player { Id = Guid.NewGuid() } };
             A.CallTo(() => _playerRepository.GetPlayerListAsync()).Returns(Task.FromResult(playersList));
+            var playersListVM = _mapper.Map<List<PlayerVM>>(playersList);
 
             // Act
             var result = await _controller.GetPlayersList();
 
             // Assert
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().Be(playersList);
+                .Which.Value.Should().BeEquivalentTo(playersListVM);
         }
 
         [Fact]
@@ -113,20 +120,20 @@ namespace DungeonsAndExiles.Api.Tests.Controllers
         }
 
         [Fact]
-        public async Task PlayerCombatWithMonster_ReturnsOkResult_WithUpdatedPlayer()
+        public async Task PlayerCombatWithMonster_ReturnsOkResult_WhenResultTrue()
         {
             // Arrange
             var playerId = Guid.NewGuid();
             var monsterId = Guid.NewGuid();
             var player = new Player { Id = playerId };
-            A.CallTo(() => _playerRepository.CombatWithMonsterAsync(playerId, monsterId)).Returns(Task.FromResult(player));
+            A.CallTo(() => _playerRepository.CombatWithMonsterAsync(playerId, monsterId)).Returns(Task.FromResult(true));
 
             // Act
             var result = await _controller.PlayerCombatWithMonster(playerId, monsterId);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().Be(player);
+                .Which.Value.Should().Be("You won");
         }
 
         [Fact]
@@ -136,13 +143,14 @@ namespace DungeonsAndExiles.Api.Tests.Controllers
             var playerId = Guid.NewGuid();
             var itemsList = new List<Item> { new Item { Id = Guid.NewGuid() } };
             A.CallTo(() => _playerRepository.GetPlayerBackpackItemsListAsync(playerId)).Returns(Task.FromResult(itemsList));
+            var itemsListVM = _mapper.Map<List<Item>>(itemsList);
 
             // Act
             var result = await _controller.GetPlayerBackpackItems(playerId);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().Be(itemsList);
+                .Which.Value.Should().BeEquivalentTo(itemsListVM, options => options.ExcludingMissingMembers());
         }
 
         [Fact]
@@ -152,13 +160,14 @@ namespace DungeonsAndExiles.Api.Tests.Controllers
             var playerId = Guid.NewGuid();
             var itemsList = new List<Item> { new Item { Id = Guid.NewGuid() } };
             A.CallTo(() => _playerRepository.GetPlayerEquipmentItemsListAsync(playerId)).Returns(Task.FromResult(itemsList));
+            var itemsListVM = _mapper.Map<List<Item>>(itemsList);
 
             // Act
             var result = await _controller.GetPlayerEquipmentItems(playerId);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().Be(itemsList);
+                .Which.Value.Should().BeEquivalentTo(itemsListVM, options => options.ExcludingMissingMembers());
         }
     }
 }

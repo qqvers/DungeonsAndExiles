@@ -1,21 +1,30 @@
-﻿using DungeonsAndExiles.Api.Controllers;
+﻿using AutoMapper;
+using DungeonsAndExiles.Api.Controllers;
 using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.Models.Domain;
+using DungeonsAndExiles.Api.Models.Profiles;
+using DungeonsAndExiles.Api.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DungeonAndExiles.Tests.Controller
+namespace DungeonsAndExiles.Tests.Controllers
 {
     public class ItemsControllerTests
     {
         private readonly ItemsController _itemsController;
         private readonly IItemRepository _itemRepository;
+        private readonly IMapper _mapper;
 
         public ItemsControllerTests()
         {
             _itemRepository = A.Fake<IItemRepository>();
-            _itemsController = new ItemsController(_itemRepository);
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            _mapper = config.CreateMapper();
+            _itemsController = new ItemsController(_itemRepository, _mapper);
         }
 
         [Fact]
@@ -23,7 +32,9 @@ namespace DungeonAndExiles.Tests.Controller
         {
             // Arrange
             var sampleItem = new Item { Id = Guid.NewGuid(), Name = "Sword", Type = "Weapon", Damage = 30, Defence = 0 };
+            var sampleItemVM = _mapper.Map<ItemVM>(sampleItem); 
             A.CallTo(() => _itemRepository.GetItemById(sampleItem.Id)).Returns(Task.FromResult(sampleItem));
+
 
             // Act
             var result = await _itemsController.GetItem(sampleItem.Id);
@@ -31,7 +42,7 @@ namespace DungeonAndExiles.Tests.Controller
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().Be(sampleItem);
+            okResult.Value.Should().BeEquivalentTo(sampleItemVM);
         }
 
         [Fact]
@@ -56,6 +67,7 @@ namespace DungeonAndExiles.Tests.Controller
             // Arrange
             var sampleItems = GetSampleItems();
             A.CallTo(() => _itemRepository.GetItemList()).Returns(Task.FromResult(sampleItems));
+            var sampleItemsVM = _mapper.Map<List<ItemVM>>(sampleItems);
 
             // Act
             var result = await _itemsController.GetItemsList();
@@ -63,9 +75,10 @@ namespace DungeonAndExiles.Tests.Controller
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().BeAssignableTo<List<Item>>();
-            var returnValue = okResult.Value as List<Item>;
+            okResult.Value.Should().BeAssignableTo<List<ItemVM>>();
+            var returnValue = okResult.Value as List<ItemVM>;
             returnValue.Should().HaveCount(3);
+            returnValue.Should().BeEquivalentTo(sampleItemsVM);
         }
 
         private List<Item> GetSampleItems()
