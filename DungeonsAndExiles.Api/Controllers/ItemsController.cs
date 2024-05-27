@@ -1,7 +1,5 @@
 ﻿using DungeonsAndExiles.Api.Data.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
