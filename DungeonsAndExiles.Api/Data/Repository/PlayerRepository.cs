@@ -144,7 +144,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
 
 
-        public async Task<Player> CombatWithMonsterAsync(Guid playerId, Guid monsterId)
+        public async Task<bool> CombatWithMonsterAsync(Guid playerId, Guid monsterId)
         {
             var player = await GetPlayerByIdAsync(playerId);
             var monstersList = await _monsterRepository.MonstersList();
@@ -189,7 +189,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             }
 
             await _appDbContext.SaveChangesAsync();
-            return player;
+            return combatResult;
         }
 
         public async Task<Player> GetPlayerByIdAsync(Guid playerId)

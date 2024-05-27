@@ -1,4 +1,5 @@
-﻿using DungeonsAndExiles.Api.Data.Interfaces;
+﻿using AutoMapper;
+using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Models.Domain;
 using Microsoft.EntityFrameworkCore;

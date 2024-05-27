@@ -1,8 +1,8 @@
-﻿using DungeonsAndExiles.Api.Data.Interfaces;
+﻿using AutoMapper;
+using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.Exceptions;
+using DungeonsAndExiles.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
@@ -11,10 +11,12 @@ namespace DungeonsAndExiles.Api.Controllers
     public class ItemsController : ControllerBase
     {
         private readonly IItemRepository _itemRepository;
+        private readonly IMapper _mapper;
 
-        public ItemsController(IItemRepository itemRepository)
+        public ItemsController(IItemRepository itemRepository, IMapper mapper)
         {
             _itemRepository = itemRepository;
+            _mapper = mapper;
         }
 
         [HttpGet("{itemId}")]
@@ -27,7 +29,8 @@ namespace DungeonsAndExiles.Api.Controllers
                 {
                     return NotFound(new { message = $"Item with ID {itemId} not found." });
                 }
-                return Ok(item);
+                var itemVM = _mapper.Map<ItemVM>(item);
+                return Ok(itemVM);
             }
             catch (NotFoundException ex)
             {
@@ -45,7 +48,8 @@ namespace DungeonsAndExiles.Api.Controllers
             try
             {
                 var itemList = await _itemRepository.GetItemList();
-                return Ok(itemList);
+                var itemVMList = _mapper.Map<List<ItemVM>>(itemList);
+                return Ok(itemVMList);
             }
             catch (Exception ex)
             {

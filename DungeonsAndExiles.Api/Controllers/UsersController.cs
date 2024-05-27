@@ -1,9 +1,11 @@
-﻿using DungeonsAndExiles.Api.Data.Interfaces;
+﻿using AutoMapper;
+using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.DTOs.User;
 using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Services;
 using DungeonsAndExiles.Api.Services.Jwt;
+using DungeonsAndExiles.Api.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -18,12 +20,14 @@ namespace DungeonsAndExiles.Api.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
         private readonly IPlayerRepository _playerRepository;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUserRepository userRepository, IJwtService jwtService, IPlayerRepository playerRepository)
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, IPlayerRepository playerRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
             _playerRepository = playerRepository;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -36,8 +40,8 @@ namespace DungeonsAndExiles.Api.Controllers
                     return BadRequest(ModelState);
                 }
                 var user = await _userRepository.RegisterUserAsync(userRegisterDto);
-
-                return Created("", user);
+                var userVM = _mapper.Map<UserVM>(user);
+                return Created("", userVM);
             }
             catch (InvalidOperationException ex)
             {
@@ -70,9 +74,10 @@ namespace DungeonsAndExiles.Api.Controllers
                     return Unauthorized("Incorrect password");
                 }
 
+                var userVM = _mapper.Map<UserVM>(user);
                 var token = _jwtService.GenerateToken(user.Id.ToString());
 
-                return Ok(new { User = user, Token = token });
+                return Ok(new { User = userVM, Token = token });
             }
             catch (Exception ex)
             {
@@ -89,8 +94,8 @@ namespace DungeonsAndExiles.Api.Controllers
                 var user = await _userRepository.FindUserByIdAsync(userId);
 
                 if (user == null) return NotFound("User with that Id does not exist");
-
-                return Ok(user);
+                var userVM = _mapper.Map<UserVM>(user);
+                return Ok(userVM);
             }
             catch (Exception ex)
             {
@@ -149,7 +154,8 @@ namespace DungeonsAndExiles.Api.Controllers
             try
             {
                 var player = await _playerRepository.CreatePlayerAsync(playerDto, userId);
-                return Created("", player);
+                var playerVM = _mapper.Map<PlayerVM>(player);
+                return Created("", playerVM);
             }
             catch (Exception ex)
             {

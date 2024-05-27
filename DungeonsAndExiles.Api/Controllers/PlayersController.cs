@@ -1,6 +1,9 @@
-﻿using DungeonsAndExiles.Api.Data.Interfaces;
+﻿using AutoMapper;
+using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.Exceptions;
+using DungeonsAndExiles.Api.Models.Domain;
+using DungeonsAndExiles.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -12,10 +15,12 @@ namespace DungeonsAndExiles.Api.Controllers
     public class PlayersController : Controller
     {
         private readonly IPlayerRepository _playerRepository;
+        private readonly IMapper _mapper;
 
-        public PlayersController(IPlayerRepository playerRepository)
+        public PlayersController(IPlayerRepository playerRepository, IMapper mapper)
         {
             _playerRepository = playerRepository;
+            _mapper = mapper;
         }
 
 
@@ -25,7 +30,8 @@ namespace DungeonsAndExiles.Api.Controllers
             try
             {
                 var player = await _playerRepository.GetPlayerByIdAsync(playerId);
-                return Ok(player);
+                var playerVM = _mapper.Map<PlayerVM>(player);
+                return Ok(playerVM);
             }
             catch (NotFoundException ex)
             {
@@ -52,7 +58,8 @@ namespace DungeonsAndExiles.Api.Controllers
             {
                 var playersList = await _playerRepository.GetPlayerListAsync();
                 if (playersList == null) { return NotFound("No players created"); }
-                return Ok(playersList);
+                var playerVMList = _mapper.Map<List<PlayerVM>>(playersList);
+                return Ok(playerVMList);
             }
             catch (Exception ex)
             {
@@ -119,8 +126,9 @@ namespace DungeonsAndExiles.Api.Controllers
         {
             try
             {
-                var player = await _playerRepository.CombatWithMonsterAsync(playerId, monsterId);
-                return Ok(player);
+                var result = await _playerRepository.CombatWithMonsterAsync(playerId, monsterId);
+                var message = result ? "You won" : "You lost";
+                return Ok(message);
             }
             catch (NotFoundException ex)
             {
@@ -137,8 +145,9 @@ namespace DungeonsAndExiles.Api.Controllers
         {
             try
             {
-                var items = await _playerRepository.GetPlayerBackpackItemsListAsync(playerId);
-                return Ok(items);
+                var itemList = await _playerRepository.GetPlayerBackpackItemsListAsync(playerId);
+                var itemVMList = _mapper.Map<List<ItemVM>>(itemList);
+                return Ok(itemVMList);
             }
             catch (NotFoundException ex)
             {
@@ -155,8 +164,9 @@ namespace DungeonsAndExiles.Api.Controllers
         {
             try
             {
-                var items = await _playerRepository.GetPlayerEquipmentItemsListAsync(playerId);
-                return Ok(items);
+                var itemList = await _playerRepository.GetPlayerEquipmentItemsListAsync(playerId);
+                var itemVMList = _mapper.Map<List<ItemVM>>(itemList);
+                return Ok(itemVMList);
             }
             catch (NotFoundException ex)
             {
