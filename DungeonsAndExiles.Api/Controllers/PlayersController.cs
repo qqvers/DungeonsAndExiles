@@ -6,7 +6,9 @@ using DungeonsAndExiles.Api.Models.Domain;
 using DungeonsAndExiles.Api.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
@@ -18,17 +20,20 @@ namespace DungeonsAndExiles.Api.Controllers
     {
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<PlayersController> _logger;
 
-        public PlayersController(IPlayerRepository playerRepository, IMapper mapper)
+        public PlayersController(IPlayerRepository playerRepository, IMapper mapper, ILogger<PlayersController> logger)
         {
             _playerRepository = playerRepository;
             _mapper = mapper;
+            _logger = logger;
         }
-
 
         [HttpGet("{playerId}")]
         public async Task<IActionResult> GetPlayer([FromRoute] Guid playerId)
         {
+            _logger.LogInformation("Attempting to get player with ID {PlayerId}", playerId);
+
             try
             {
                 var player = await _playerRepository.GetPlayerByIdAsync(playerId);
@@ -37,34 +42,35 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
+                _logger.LogWarning(ex, "Player with ID {PlayerId} not found", playerId);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while getting player with ID {PlayerId}", playerId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        //currently not needed
-        /*[HttpPost("{playerId}")]
-                public async Task<IActionResult> UpdatePlayer([FromRoute] Guid playerId,[FromBody] PlayerUpdateDto playerUpdateDto)
-                {
-                    var player = await _playerRepository.UpdatePlayerAsync(playerId,playerUpdateDto);
-                    return Created("", player);
-                }*/
-
         [HttpGet]
         public async Task<IActionResult> GetPlayersList()
         {
+            _logger.LogInformation("Attempting to get players list");
+
             try
             {
                 var playersList = await _playerRepository.GetPlayerListAsync();
-                if (playersList == null) { return NotFound("No players created"); }
+                if (playersList == null)
+                {
+                    _logger.LogWarning("No players found");
+                    return NotFound("No players created");
+                }
                 var playerVMList = _mapper.Map<List<PlayerVM>>(playersList);
                 return Ok(playerVMList);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while getting players list");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -72,6 +78,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpDelete("{playerId}")]
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
+            _logger.LogInformation("Attempting to delete player with ID {PlayerId}", playerId);
+
             try
             {
                 await _playerRepository.DeletePlayerAsync(playerId);
@@ -79,10 +87,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
+                _logger.LogWarning(ex, "Player with ID {PlayerId} not found", playerId);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while deleting player with ID {PlayerId}", playerId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -90,6 +100,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpDelete("{playerId}/backpacks/items/{itemId}")]
         public async Task<IActionResult> DeleteItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
+            _logger.LogInformation("Attempting to delete item with ID {ItemId} from backpack for player with ID {PlayerId}", itemId, playerId);
+
             try
             {
                 await _playerRepository.RemoveItemFromBackpackAsync(playerId, itemId);
@@ -97,10 +109,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
+                _logger.LogWarning(ex, "Item with ID {ItemId} not found in backpack for player with ID {PlayerId}", itemId, playerId);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while deleting item with ID {ItemId} from backpack for player with ID {PlayerId}", itemId, playerId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -108,6 +122,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpPost("{playerId}/items/{itemId}")]
         public async Task<IActionResult> EquipItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
+            _logger.LogInformation("Attempting to equip item with ID {ItemId} for player with ID {PlayerId}", itemId, playerId);
+
             try
             {
                 await _playerRepository.EquipItemAsync(playerId, itemId);
@@ -115,10 +131,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
+                _logger.LogWarning(ex, "Item with ID {ItemId} not found for player with ID {PlayerId}", itemId, playerId);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while equipping item with ID {ItemId} for player with ID {PlayerId}", itemId, playerId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -126,6 +144,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpPost("{playerId}/monsters/{monsterId}")]
         public async Task<IActionResult> PlayerCombatWithMonster([FromRoute] Guid playerId, [FromRoute] Guid monsterId)
         {
+            _logger.LogInformation("Attempting to start combat between player with ID {PlayerId} and monster with ID {MonsterId}", playerId, monsterId);
+
             try
             {
                 var result = await _playerRepository.CombatWithMonsterAsync(playerId, monsterId);
@@ -134,10 +154,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
+                _logger.LogWarning(ex, "Monster with ID {MonsterId} not found for player with ID {PlayerId}", monsterId, playerId);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while starting combat between player with ID {PlayerId} and monster with ID {MonsterId}", playerId, monsterId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -145,6 +167,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpGet("{playerId}/backpacks/items")]
         public async Task<IActionResult> GetPlayerBackpackItems([FromRoute] Guid playerId)
         {
+            _logger.LogInformation("Attempting to get backpack items for player with ID {PlayerId}", playerId);
+
             try
             {
                 var itemList = await _playerRepository.GetPlayerBackpackItemsListAsync(playerId);
@@ -153,10 +177,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
+                _logger.LogWarning(ex, "Backpack items not found for player with ID {PlayerId}", playerId);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while getting backpack items for player with ID {PlayerId}", playerId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -164,6 +190,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpGet("{playerId}/equipments/items")]
         public async Task<IActionResult> GetPlayerEquipmentItems([FromRoute] Guid playerId)
         {
+            _logger.LogInformation("Attempting to get equipment items for player with ID {PlayerId}", playerId);
+
             try
             {
                 var itemList = await _playerRepository.GetPlayerEquipmentItemsListAsync(playerId);
@@ -172,10 +200,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
+                _logger.LogWarning(ex, "Equipment items not found for player with ID {PlayerId}", playerId);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Internal server error while getting equipment items for player with ID {PlayerId}", playerId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

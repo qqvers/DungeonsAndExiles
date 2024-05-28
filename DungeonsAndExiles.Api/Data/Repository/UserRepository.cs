@@ -5,6 +5,9 @@ using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Models.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Data.Repository
 {
@@ -12,20 +15,27 @@ namespace DungeonsAndExiles.Api.Data.Repository
     {
         private readonly AppDbContext _appDbContext;
         private readonly IMapper _mapper;
-        public UserRepository(AppDbContext appDbContext, IMapper mapper)
+        private readonly ILogger<UserRepository> _logger;
+
+        public UserRepository(AppDbContext appDbContext, IMapper mapper, ILogger<UserRepository> logger)
         {
             _appDbContext = appDbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<User> RegisterUserAsync(UserRegisterDto userRegisterDto)
         {
-            if (userRegisterDto == null) throw new ArgumentNullException(nameof(userRegisterDto));
+            if (userRegisterDto == null)
+                throw new ArgumentNullException(nameof(userRegisterDto));
+
+            _logger.LogInformation("Attempting to register a new user with email: {Email}", userRegisterDto.Email);
 
             var existingCustomer = await _appDbContext.Users
                 .AnyAsync(o => o.Email == userRegisterDto.Email);
             if (existingCustomer)
             {
+                _logger.LogWarning("Email {Email} already in use by another customer", userRegisterDto.Email);
                 throw new InvalidOperationException("Email already in use by another customer");
             }
 
@@ -34,6 +44,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (defaultRole == null)
             {
+                _logger.LogError("Role User not found");
                 throw new NotFoundException("Role User not found");
             }
             newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
@@ -42,68 +53,105 @@ namespace DungeonsAndExiles.Api.Data.Repository
             _appDbContext.Users.Add(newUser);
             await _appDbContext.SaveChangesAsync();
 
+            _logger.LogInformation("User with email {Email} registered successfully", userRegisterDto.Email);
             return newUser;
         }
 
         public async Task<User> FindUserInDatabase(UserLoginDto userLoginDto)
         {
-            if (userLoginDto == null) throw new ArgumentNullException(nameof(userLoginDto));
+            if (userLoginDto == null)
+                throw new ArgumentNullException(nameof(userLoginDto));
+
+            _logger.LogInformation("Attempting to find user with email: {Email}", userLoginDto.Email);
 
             var loggedUser = await _appDbContext.Users
-                        .SingleOrDefaultAsync(o => o.Email == userLoginDto.Email);
+                .SingleOrDefaultAsync(o => o.Email == userLoginDto.Email);
 
+            if (loggedUser == null)
+            {
+                _logger.LogWarning("User with email {Email} not found", userLoginDto.Email);
+            }
 
             return loggedUser;
         }
 
         public async Task<User> FindUserByIdAsync(Guid userId)
         {
+            _logger.LogInformation("Attempting to find user with ID: {UserId}", userId);
+
             var user = await _appDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+            if (user == null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found", userId);
+            }
 
             return user;
         }
 
         public async Task<bool> UpdateUserAsync(Guid userId, UserUpdateDto userUpdateDto)
         {
+            _logger.LogInformation("Attempting to update user with ID: {UserId}", userId);
+
             var currentUser = await _appDbContext.Users.FindAsync(userId);
-            if (currentUser == null) { throw new ArgumentNullException(nameof(currentUser)); }
+            if (currentUser == null)
+            {
+                _logger.LogError("User with ID {UserId} not found", userId);
+                throw new ArgumentNullException(nameof(currentUser));
+            }
 
             var emailInDatabase = await _appDbContext.Users.FirstOrDefaultAsync(x => x.Email == userUpdateDto.Email);
 
-            if(emailInDatabase != null) 
+            if (emailInDatabase != null)
             {
+                _logger.LogWarning("Email {Email} is taken by another user", userUpdateDto.Email);
                 throw new InvalidOperationException("Selected email is taken by other user");
             }
 
             userUpdateDto.Password = BCrypt.Net.BCrypt.HashPassword(userUpdateDto.Password);
-            _mapper.Map(userUpdateDto, currentUser); 
-
+            _mapper.Map(userUpdateDto, currentUser);
 
             await _appDbContext.SaveChangesAsync();
+
+            _logger.LogInformation("User with ID {UserId} updated successfully", userId);
 
             return true;
         }
 
-
         public async Task<bool> DeleteUserAsync(Guid userId)
         {
+            _logger.LogInformation("Attempting to delete user with ID: {UserId}", userId);
+
             var user = _appDbContext.Users.FirstOrDefault(x => x.Id == userId);
 
-            if (user == null) return false;
+            if (user == null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found", userId);
+                return false;
+            }
 
             _appDbContext.Users.Remove(user);
             await _appDbContext.SaveChangesAsync();
+
+            _logger.LogInformation("User with ID {UserId} deleted successfully", userId);
 
             return true;
         }
 
         public async Task<Role> GetUserRole(Guid roleId)
         {
+            _logger.LogInformation("Attempting to find role with ID: {RoleId}", roleId);
+
             var role = await _appDbContext.Roles.FindAsync(roleId);
-            if (role == null) throw new NotFoundException($"Role with ID {roleId} does not exist");
+            if (role == null)
+            {
+                _logger.LogWarning("Role with ID {RoleId} does not exist", roleId);
+                throw new NotFoundException($"Role with ID {roleId} does not exist");
+            }
+
+            _logger.LogInformation("Role with ID {RoleId} found successfully", roleId);
 
             return role;
         }
-
     }
 }
