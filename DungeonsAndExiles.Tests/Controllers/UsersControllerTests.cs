@@ -208,7 +208,7 @@ namespace DungeonsAndExiles.Tests.Controllers
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var playerDto = new PlayerDto { Name = "Player1"};
+            var playerDto = new PlayerDto { Name = "Player1" };
             var player = new Player { Id = Guid.NewGuid(), Name = "Player1", Level = 1 };
             A.CallTo(() => _playerRepository.CreatePlayerAsync(playerDto, userId)).Returns(Task.FromResult(player));
             var playerVM = _mapper.Map<PlayerVM>(player);
@@ -222,5 +222,36 @@ namespace DungeonsAndExiles.Tests.Controllers
             var createdResult = result as CreatedResult;
             createdResult.Value.Should().BeEquivalentTo(playerVM);
         }
+
+        [Fact]
+        public async Task GetListOfUserPlayers_ReturnsOk_WithListOfPlayers()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var players = new List<Player>
+            {
+                new Player { Id = Guid.NewGuid(), UserId = userId, Name = "Player1" },
+                new Player { Id = Guid.NewGuid(), UserId = userId, Name = "Player2" }
+            };
+            A.CallTo(() => _playerRepository.GetPlayersByUserIdAsync(userId)).Returns(players);
+
+            // Act
+            var result = await _usersController.GetListOfUserPlayers(userId);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(_mapper.Map<List<PlayerVM>>(players));
+        }
+
+        [Fact]
+        public async Task GetListOfUserPlayers_ReturnsBadRequest_WhenUserIdIsEmpty()
+        {
+            // Act
+            var result = await _usersController.GetListOfUserPlayers(Guid.Empty);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
     }
 }

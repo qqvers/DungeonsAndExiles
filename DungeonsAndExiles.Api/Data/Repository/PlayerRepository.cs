@@ -299,6 +299,12 @@ namespace DungeonsAndExiles.Api.Data.Repository
             return backpackItems;
         }
 
+        public async Task<List<Player>> GetPlayersByUserIdAsync(Guid userId)
+        {
+            return await _appDbContext.Players.Where(p => p.UserId == userId).ToListAsync();
+        }
+
+
 
     }
 }

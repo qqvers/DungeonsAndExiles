@@ -17,6 +17,6 @@ namespace DungeonsAndExiles.Api.Data.Interfaces
         Task<bool> CombatWithMonsterAsync(Guid playerId, Guid monsterId);
         Task<List<Item>> GetPlayerEquipmentItemsListAsync(Guid playerId);
         Task<List<Item>> GetPlayerBackpackItemsListAsync(Guid playerId);
-
+        Task<List<Player>> GetPlayersByUserIdAsync(Guid userId);
     }
 }

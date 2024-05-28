@@ -162,5 +162,32 @@ namespace DungeonsAndExiles.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("{userId}/players")]
+        public async Task<IActionResult> GetListOfUserPlayers([FromRoute] Guid userId)
+        {
+            if (userId == Guid.Empty)
+            {
+                return BadRequest("User ID cannot be empty.");
+            }
+
+            try
+            {
+                var listOfUserPlayers = await _playerRepository.GetPlayersByUserIdAsync(userId);
+                if (listOfUserPlayers == null || !listOfUserPlayers.Any())
+                {
+                    return NotFound($"No players found for user with ID {userId}.");
+                }
+
+                var listOfUserPlayersM = _mapper.Map<List<PlayerVM>>(listOfUserPlayers);
+
+                return Ok(listOfUserPlayersM);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
     }
 }
