@@ -3,24 +3,31 @@ using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.DTOs.User;
 using DungeonsAndExiles.Api.Exceptions;
+using DungeonsAndExiles.Api.Models.Domain;
 using DungeonsAndExiles.Api.Services;
 using DungeonsAndExiles.Api.Services.Jwt;
 using DungeonsAndExiles.Api.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UsersController : Controller
     {
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
+        private readonly SymmetricSecurityKey loginKey;
 
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IPlayerRepository playerRepository, IMapper mapper)
         {
@@ -28,9 +35,12 @@ namespace DungeonsAndExiles.Api.Controllers
             _jwtService = jwtService;
             _playerRepository = playerRepository;
             _mapper = mapper;
+            string secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
+            loginKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] UserRegisterDto userRegisterDto)
         {
             try
@@ -54,6 +64,7 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
             try
@@ -74,10 +85,31 @@ namespace DungeonsAndExiles.Api.Controllers
                     return Unauthorized("Incorrect password");
                 }
 
-                var userVM = _mapper.Map<UserVM>(user);
-                var token = _jwtService.GenerateToken(user.Id.ToString());
+                var role = await _userRepository.GetUserRole(user.RoleId);
+                var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(ClaimTypes.Role, role.Name) 
+                };
 
-                return Ok(new { User = userVM, Token = token });
+                var creds = new SigningCredentials(loginKey, SecurityAlgorithms.HmacSha256);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.UtcNow.AddDays(1),
+                    SigningCredentials = creds
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                var userVM = _mapper.Map<UserVM>(user);
+
+
+
+                return Ok(new { User = userVM, Token = tokenHandler.WriteToken(token), });
             }
             catch (Exception ex)
             {
@@ -86,6 +118,7 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpGet("{userId}")]
+        [Authorize(Policy = "SignedInOnly")]
         public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
         {
             try
@@ -104,6 +137,7 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpPut("{userId}")]
+        [Authorize(Policy = "SignedInOnly")]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid userId, [FromBody] UserUpdateDto updatedUser)
         {
             try
@@ -131,6 +165,7 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpDelete("{userId}")]
+        [Authorize(Policy = "SignedInOnly")]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid userId)
         {
             try
@@ -164,6 +199,7 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpGet("{userId}/players")]
+        [Authorize(Policy = "SignedInOnly")]
         public async Task<IActionResult> GetListOfUserPlayers([FromRoute] Guid userId)
         {
             if (userId == Guid.Empty)

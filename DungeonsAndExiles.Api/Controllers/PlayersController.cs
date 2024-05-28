@@ -4,6 +4,7 @@ using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Models.Domain;
 using DungeonsAndExiles.Api.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace DungeonsAndExiles.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "SignedInOnly")]
     public class PlayersController : Controller
     {
         private readonly IPlayerRepository _playerRepository;

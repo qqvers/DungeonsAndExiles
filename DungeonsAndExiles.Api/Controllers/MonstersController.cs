@@ -1,5 +1,6 @@
 ﻿using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace DungeonsAndExiles.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "SignedInOnly")]
     public class MonstersController : ControllerBase
     {
         private readonly IMonsterRepository _monsterRepository;

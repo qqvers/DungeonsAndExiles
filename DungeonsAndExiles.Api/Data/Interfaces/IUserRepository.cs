@@ -10,5 +10,6 @@ namespace DungeonsAndExiles.Api.Data.Interfaces
         Task<bool> UpdateUserAsync(Guid userId, UserUpdateDto userUpdateDto);
         Task<User> FindUserByIdAsync(Guid userId);
         Task<bool> DeleteUserAsync(Guid userId);
+        Task<Role> GetUserRole(Guid userId);
     }
 }

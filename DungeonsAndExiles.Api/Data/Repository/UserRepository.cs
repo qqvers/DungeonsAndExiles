@@ -97,5 +97,13 @@ namespace DungeonsAndExiles.Api.Data.Repository
             return true;
         }
 
+        public async Task<Role> GetUserRole(Guid roleId)
+        {
+            var role = await _appDbContext.Roles.FindAsync(roleId);
+            if (role == null) throw new NotFoundException($"Role with ID {roleId} does not exist");
+
+            return role;
+        }
+
     }
 }

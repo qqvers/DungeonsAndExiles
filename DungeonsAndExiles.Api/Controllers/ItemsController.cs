@@ -2,12 +2,14 @@
 using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "SignedInOnly")]
     public class ItemsController : ControllerBase
     {
         private readonly IItemRepository _itemRepository;
