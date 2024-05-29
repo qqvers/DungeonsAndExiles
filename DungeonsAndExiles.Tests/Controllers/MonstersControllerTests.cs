@@ -4,6 +4,7 @@ using DungeonsAndExiles.Api.Models.Domain;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace DungeonsAndExiles.Tests.Controllers
 {
@@ -11,12 +12,14 @@ namespace DungeonsAndExiles.Tests.Controllers
     {
         private readonly MonstersController _monstersController;
         private readonly IMonsterRepository _monsterRepository;
+        private readonly ILogger<MonstersController> _logger;
 
 
         public MonstersControllerTests()
         {
             _monsterRepository = A.Fake<IMonsterRepository>();
-            _monstersController = new MonstersController(_monsterRepository);
+            _logger = A.Fake<ILogger<MonstersController>>();
+            _monstersController = new MonstersController(_monsterRepository, _logger);
         }
 
         [Fact]

@@ -7,6 +7,7 @@ using DungeonsAndExiles.Api.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Numerics;
 
 namespace DungeonsAndExiles.Tests.Controllers
@@ -16,6 +17,7 @@ namespace DungeonsAndExiles.Tests.Controllers
         private readonly PlayersController _controller;
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<PlayersController> _logger;
 
         public PlayersControllerTests()
         {
@@ -25,7 +27,8 @@ namespace DungeonsAndExiles.Tests.Controllers
                 cfg.AddProfile<MappingProfile>();
             });
             _mapper = config.CreateMapper();
-            _controller = new PlayersController(_playerRepository, _mapper);
+            _logger = A.Fake<ILogger<PlayersController>>();
+            _controller = new PlayersController(_playerRepository, _mapper, _logger);
         }
 
         [Fact]

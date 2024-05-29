@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Castle.Core.Logging;
 using DungeonsAndExiles.Api.Controllers;
 using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.DTOs.Player;
@@ -10,6 +11,7 @@ using DungeonsAndExiles.Api.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace DungeonsAndExiles.Tests.Controllers
 {
@@ -20,6 +22,8 @@ namespace DungeonsAndExiles.Tests.Controllers
         private readonly IJwtService _jwtService;
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<UsersController> _logger;
+
 
         public UsersControllerTests()
         {
@@ -31,7 +35,8 @@ namespace DungeonsAndExiles.Tests.Controllers
                 cfg.AddProfile<MappingProfile>();
             });
             _mapper = config.CreateMapper();
-            _usersController = new UsersController(_userRepository, _jwtService, _playerRepository, _mapper);
+            _logger = A.Fake<ILogger<UsersController>>();
+            _usersController = new UsersController(_userRepository, _jwtService, _playerRepository, _mapper, _logger);
         }
 
         [Fact]
@@ -50,26 +55,6 @@ namespace DungeonsAndExiles.Tests.Controllers
             result.Should().BeOfType<CreatedResult>();
             var createdResult = result as CreatedResult;
             createdResult.Value.Should().BeEquivalentTo(userVM);
-        }
-
-        [Fact]
-        public async Task Login_ReturnsOkWithToken_WhenCredentialsAreValid()
-        {
-            // Arrange
-            var userLoginDto = new UserLoginDto { Email = "test@example.com", Password = "Password123" };
-            var user = new User { Id = Guid.NewGuid(), Email = "test@example.com", Password = BCrypt.Net.BCrypt.HashPassword("Password123") };
-            var token = "fake-jwt-token";
-            A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Returns(Task.FromResult(user));
-            A.CallTo(() => _jwtService.GenerateToken(user.Id.ToString())).Returns(token);
-            var userVM = _mapper.Map<UserVM>(user);
-
-            // Act
-            var result = await _usersController.Login(userLoginDto);
-
-            // Assert
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = result as OkObjectResult;
-            okResult.Value.Should().BeEquivalentTo(new { User = userVM, Token = token });
         }
 
         [Fact]

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Castle.Core.Logging;
 using DungeonsAndExiles.Api.Controllers;
 using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.Models.Domain;
@@ -7,6 +8,7 @@ using DungeonsAndExiles.Api.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace DungeonsAndExiles.Tests.Controllers
 {
@@ -15,6 +17,7 @@ namespace DungeonsAndExiles.Tests.Controllers
         private readonly ItemsController _itemsController;
         private readonly IItemRepository _itemRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<ItemsController> _logger;
 
         public ItemsControllerTests()
         {
@@ -24,7 +27,8 @@ namespace DungeonsAndExiles.Tests.Controllers
                 cfg.AddProfile<MappingProfile>();
             });
             _mapper = config.CreateMapper();
-            _itemsController = new ItemsController(_itemRepository, _mapper);
+           _logger = A.Fake<ILogger<ItemsController>>();
+            _itemsController = new ItemsController(_itemRepository, _mapper, _logger);
         }
 
         [Fact]
