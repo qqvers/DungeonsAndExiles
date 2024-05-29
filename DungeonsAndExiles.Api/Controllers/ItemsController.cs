@@ -27,7 +27,10 @@ namespace DungeonsAndExiles.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{itemId}")]
+        [HttpGet("{itemId:Guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetItem([FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to get item with ID {ItemId}", itemId);
@@ -56,6 +59,8 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetItemsList()
         {
             _logger.LogInformation("Attempting to get items list");

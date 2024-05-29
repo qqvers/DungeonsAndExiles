@@ -153,5 +153,14 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             return role;
         }
+
+        public async Task<bool> UpdateUserToken(User user)
+        {
+            _logger.LogInformation("Attempting to update token for user with ID: {user.Id}", user.Id);
+            _appDbContext.Users.Update(user);
+            await _appDbContext.SaveChangesAsync();
+            _logger.LogInformation("Token updated successfully for user with {user.Id}", user.Id);
+            return true;
+        }
     }
 }

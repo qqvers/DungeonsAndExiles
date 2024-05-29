@@ -29,7 +29,10 @@ namespace DungeonsAndExiles.Api.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{playerId}")]
+        [HttpGet("{playerId:Guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetPlayer([FromRoute] Guid playerId)
         {
             _logger.LogInformation("Attempting to get player with ID {PlayerId}", playerId);
@@ -53,6 +56,9 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetPlayersList()
         {
             _logger.LogInformation("Attempting to get players list");
@@ -75,7 +81,10 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpDelete("{playerId}")]
+        [HttpDelete("{playerId:Guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
             _logger.LogInformation("Attempting to delete player with ID {PlayerId}", playerId);
@@ -97,7 +106,10 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpDelete("{playerId}/backpacks/items/{itemId}")]
+        [HttpDelete("{playerId:Guid}/backpacks/items/{itemId:Guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to delete item with ID {ItemId} from backpack for player with ID {PlayerId}", itemId, playerId);
@@ -119,7 +131,10 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpPost("{playerId}/items/{itemId}")]
+        [HttpPost("{playerId:Guid}/items/{itemId:Guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> EquipItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to equip item with ID {ItemId} for player with ID {PlayerId}", itemId, playerId);
@@ -141,7 +156,10 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpPost("{playerId}/monsters/{monsterId}")]
+        [HttpPost("{playerId:Guid}/monsters/{monsterId:Guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> PlayerCombatWithMonster([FromRoute] Guid playerId, [FromRoute] Guid monsterId)
         {
             _logger.LogInformation("Attempting to start combat between player with ID {PlayerId} and monster with ID {MonsterId}", playerId, monsterId);
@@ -164,7 +182,10 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpGet("{playerId}/backpacks/items")]
+        [HttpGet("{playerId:Guid}/backpacks/items")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetPlayerBackpackItems([FromRoute] Guid playerId)
         {
             _logger.LogInformation("Attempting to get backpack items for player with ID {PlayerId}", playerId);
@@ -187,7 +208,10 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpGet("{playerId}/equipments/items")]
+        [HttpGet("{playerId:Guid}/equipments/items")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetPlayerEquipmentItems([FromRoute] Guid playerId)
         {
             _logger.LogInformation("Attempting to get equipment items for player with ID {PlayerId}", playerId);

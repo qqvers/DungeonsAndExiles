@@ -65,7 +65,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("SignedInOnly", policy => policy.RequireRole("Admin","User"));
+    options.AddPolicy("SignedInOnly", policy => policy.RequireRole("Admin","User")); // currently useless
 });
 
 var secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");

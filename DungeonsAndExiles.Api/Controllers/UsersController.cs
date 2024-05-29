@@ -17,6 +17,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using DungeonsAndExiles.Api.Models.Authentication;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Cryptography;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
@@ -30,8 +33,10 @@ namespace DungeonsAndExiles.Api.Controllers
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<UsersController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public UsersController(IUserRepository userRepository, IJwtService jwtService, IPlayerRepository playerRepository, IMapper mapper, ILogger<UsersController> logger)
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, 
+            IPlayerRepository playerRepository, IMapper mapper, ILogger<UsersController> logger, IConfiguration configuration)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -39,10 +44,15 @@ namespace DungeonsAndExiles.Api.Controllers
             _mapper = mapper;
             _logger = logger;
             string secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
         [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] UserRegisterDto userRegisterDto)
         {
             _logger.LogInformation("Attempting to register a new user");
@@ -73,6 +83,11 @@ namespace DungeonsAndExiles.Api.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
             _logger.LogInformation("Attempting to log in user with email {Email}", userLoginDto.Email);
@@ -99,11 +114,17 @@ namespace DungeonsAndExiles.Api.Controllers
 
                 var role = await _userRepository.GetUserRole(user.RoleId);
                 var token = await _jwtService.GenerateToken(user, role);
+                var refreshToken = GenerateRefreshToken();
+
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(1);
+
+                await _userRepository.UpdateUserToken(user);
 
                 var userVM = _mapper.Map<UserVM>(user);
 
                 _logger.LogInformation("User with email {Email} logged in successfully", userLoginDto.Email);
-                return Ok(new { User = userVM, Token = token });
+                return Ok(new { User = userVM, Token = token, RefreshToken = refreshToken });
             }
             catch (Exception ex)
             {
@@ -112,8 +133,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpGet("{userId}")]
+        [HttpGet("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
         {
             _logger.LogInformation("Attempting to get user with ID {UserId}", userId);
@@ -143,8 +168,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpPut("{userId}")]
+        [HttpPut("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid userId, [FromBody] UserUpdateDto updatedUser)
         {
             _logger.LogInformation("Attempting to update user with ID {UserId}", userId);
@@ -179,8 +208,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpDelete("{userId}")]
+        [HttpDelete("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid userId)
         {
             _logger.LogInformation("Attempting to delete user with ID {UserId}", userId);
@@ -209,7 +242,9 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpPost("{userId}/create-player")]
+        [HttpPost("{userId:Guid}/create-player")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreatePlayer([FromRoute] Guid userId, [FromBody] PlayerDto playerDto)
         {
             _logger.LogInformation("Attempting to create player for user with ID {UserId}", userId);
@@ -227,8 +262,12 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
-        [HttpGet("{userId}/players")]
+        [HttpGet("{userId:Guid}/players")]
         [Authorize(Policy = "SignedInOnly")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetListOfUserPlayers([FromRoute] Guid userId)
         {
             _logger.LogInformation("Attempting to get list of players for user with ID {UserId}", userId);
@@ -257,5 +296,59 @@ namespace DungeonsAndExiles.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpPost("{userId:Guid}/refresh")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Refresh([FromRoute] Guid userId, [FromBody] RefreshModel model)
+        {
+            _logger.LogInformation("Refresh called");
+
+            if (userId == Guid.Empty)
+            {
+                _logger.LogWarning("User ID is empty");
+                return BadRequest("User ID cannot be empty.");
+            }
+            try
+            {
+            var user = await _userRepository.FindUserByIdAsync(userId);
+
+            if (user is null || user.RefreshToken != model.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
+                return Unauthorized();
+
+            var role = await _userRepository.GetUserRole(user.RoleId);
+            var tokenResult = await _jwtService.GenerateToken(user, role);
+
+            _logger.LogInformation("Refresh succeeded");
+
+            return Ok(new
+            {
+                JwtToken = tokenResult.Token,
+                Expiration = tokenResult.Expiration,
+                RefreshToken = model.RefreshToken
+            });
+
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error while refreshing token for user with ID {UserId}", userId);
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+
+        }
+
+        private static string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+
+            using var generator = RandomNumberGenerator.Create();
+
+            generator.GetBytes(randomNumber);
+
+            return Convert.ToBase64String(randomNumber);
+        }
+
     }
 }

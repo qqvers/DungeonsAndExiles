@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using DungeonsAndExiles.Api.Models.Domain;
+using DungeonsAndExiles.Api.Models.Authentication;
 
 namespace DungeonsAndExiles.Api.Services.Jwt
 {
@@ -20,7 +21,7 @@ namespace DungeonsAndExiles.Api.Services.Jwt
             _secretKey = _configuration["SECRET_KEY"];
         }
 
-        public async Task<string> GenerateToken(User user, Role role)
+        public async Task<TokenResult> GenerateToken(User user, Role role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secretKey);
@@ -35,12 +36,18 @@ namespace DungeonsAndExiles.Api.Services.Jwt
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(1),
+                Expires = DateTime.UtcNow.AddMinutes(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            return new TokenResult
+            {
+                Token = tokenString,
+                Expiration = token.ValidTo
+            };
         }
     }
 }

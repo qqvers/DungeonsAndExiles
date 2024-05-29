@@ -23,6 +23,8 @@ namespace DungeonsAndExiles.Api.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetMonstersList()
         {
             _logger.LogInformation("Attempting to get monsters list");
