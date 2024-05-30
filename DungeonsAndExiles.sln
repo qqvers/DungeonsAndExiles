@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonsAndExiles.Api", "DungeonsAndExiles.Api\DungeonsAndExiles.Api.csproj", "{1A360C59-0336-43E2-B350-2153430139B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonsAndExiles.Tests", "DungeonsAndExiles.Tests\DungeonsAndExiles.Tests.csproj", "{01C77623-2B11-403A-A065-779E4928337A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DungeonsAndExiles.UnitTests", "DungeonsAndExiles.UnitTests\DungeonsAndExiles.UnitTests.csproj", "{01C77623-2B11-403A-A065-779E4928337A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
