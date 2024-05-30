@@ -173,6 +173,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(499)]
         public async Task<IActionResult> PlayerCombatWithMonster([FromRoute] Guid playerId, [FromRoute] Guid monsterId, CancellationToken cancellationToken)
         {
@@ -180,10 +181,7 @@ namespace DungeonsAndExiles.Api.Controllers
 
             try
             {
-                //operation gonna take 10s to find a monster
-                await Task.Delay(10000, cancellationToken);
-
-                var result = await _playerRepository.CombatWithMonsterAsync(playerId, monsterId);
+                var result = await _playerRepository.CombatWithMonsterAsync(playerId, monsterId, cancellationToken);
                 var message = result ? "You won" : "You lost";
                 return Ok(message);
             }
@@ -191,6 +189,11 @@ namespace DungeonsAndExiles.Api.Controllers
             {
                 _logger.LogInformation("Request was cancelled by the client.");
                 return StatusCode(499, "Request cancelled."); 
+            }
+            catch (PlayerCombatValidationException ex)
+            {
+                _logger.LogWarning(ex, "Player can not start a combat with 0 stamina or 0 space in backpack");
+                return BadRequest(ex.Message);
             }
             catch (NotFoundException ex)
             {

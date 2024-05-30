@@ -14,7 +14,7 @@ namespace DungeonsAndExiles.Api.Data.Interfaces
         Task<bool> AddItemToBackpackAsync(Guid playerId, Guid itemId);
         Task<bool> RemoveItemFromBackpackAsync(Guid playerId, Guid itemId);
         Task<bool> EquipItemAsync(Guid playerId, Guid itemId);
-        Task<bool> CombatWithMonsterAsync(Guid playerId, Guid monsterId);
+        Task<bool> CombatWithMonsterAsync(Guid playerId, Guid monsterId, CancellationToken cancellationToken);
         Task<List<Item>> GetPlayerEquipmentItemsListAsync(Guid playerId);
         Task<List<Item>> GetPlayerBackpackItemsListAsync(Guid playerId);
         Task<List<Player>> GetPlayersByUserIdAsync(Guid userId);

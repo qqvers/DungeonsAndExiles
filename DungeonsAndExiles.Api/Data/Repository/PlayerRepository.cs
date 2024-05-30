@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Data.Repository
@@ -87,6 +88,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             player.Damage = 1;
             player.Defence = 0;
             player.Experience = 0;
+            player.Stamina = 20;
             player.BackpackId = backpack.Id;
             player.EquipmentId = equipment.Id;
             player.UserId = userId;
@@ -169,11 +171,28 @@ namespace DungeonsAndExiles.Api.Data.Repository
             return true;
         }
 
-        public async Task<bool> CombatWithMonsterAsync(Guid playerId, Guid monsterId)
+        public async Task<bool> CombatWithMonsterAsync(Guid playerId, Guid monsterId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Attempting to start combat between player with ID {PlayerId} and monster with ID {MonsterId}", playerId, monsterId);
 
             var player = await GetPlayerByIdAsync(playerId);
+            var playerBackpack = await _backpackRepository.GetBackpackByIdAsync(player.BackpackId);
+
+            if(player.Stamina == 0)
+            {
+                _logger.LogWarning("Player can not start a combat with 0 stamina");
+                throw new PlayerCombatValidationException($"Player can not start a combat with 0 stamina.");
+            }
+
+            if (playerBackpack.Capacity == playerBackpack.Items.Count)
+            {
+                _logger.LogWarning("Player can not start a combat with no space in backpack");
+                throw new PlayerCombatValidationException("Player can not start a combat with no space in backpack");
+            }
+
+            //operation gonna take 10s to find a monster
+            await Task.Delay(10000, cancellationToken);
+
             var monstersList = await _monsterRepository.MonstersList();
             var monster = monstersList.FirstOrDefault(m => m.Id == monsterId);
             var itemList = await _itemRepository.GetItemList();
@@ -198,6 +217,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (combatResult)
             {
+                player.Stamina -= 1;
                 Item? dropResult = _combatService.SimulateDropAfterCombat(itemList);
 
                 if (player.Experience < 4)

@@ -13,28 +13,35 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using AspNetCoreRateLimit;
 using FluentAssertions.Common;
+using Hangfire;
+using Hangfire.PostgreSql;
+using DungeonsAndExiles.Api.Services.DatabaseUpdate;
 
-Env.Load();
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+public class Program
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    private static void Main(string[] args)
     {
-        In = ParameterLocation.Header,
-        Description = "Please enter 'Bearer' followed by space and JWT token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
+        Env.Load();
+        var builder = WebApplication.CreateBuilder(args);
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+        // Add services to the container.
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter 'Bearer' followed by space and JWT token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
         {
             new OpenApiSecurityScheme
             {
@@ -46,82 +53,110 @@ builder.Services.AddSwaggerGen(c =>
             },
             new string[] {}
         }
-    });
+            });
 
-    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-});
+            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+        });
 
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
-builder.Services.AddRouting(options => options.LowercaseUrls = true);
-builder.Services.AddControllersWithViews()
-    .AddNewtonsoftJson(options =>
-        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-    );
+        builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        builder.Services.AddRouting(options => options.LowercaseUrls = true);
+        builder.Services.AddControllersWithViews()
+            .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
 
-var connectionString = Environment.GetEnvironmentVariable("DatabaseURL");
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-});
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("SignedInOnly", policy => policy.RequireRole("Admin","User")); // currently useless
-});
-
-var secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+        var connectionString = Environment.GetEnvironmentVariable("DatabaseURL");
+        builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+            options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        });
 
-builder.Services.AddOptions();
-builder.Services.AddMemoryCache();
-builder.Services.Configure<ClientRateLimitOptions>(builder.Configuration.GetSection("ClientRateLimiting"));
-builder.Services.Configure<ClientRateLimitPolicies>(builder.Configuration.GetSection("ClientRateLimitPolicies"));
-builder.Services.AddInMemoryRateLimiting();
-builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+        builder.Services.AddHangfire(configuration =>
+            configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                         .UseSimpleAssemblyNameTypeSerializer()
+                         .UseDefaultTypeSerializer()
+                         .UsePostgreSqlStorage(connectionString, new PostgreSqlStorageOptions
+                         {
+                             QueuePollInterval = TimeSpan.FromSeconds(15)
+                         }));
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
-builder.Services.AddScoped<IItemRepository, ItemRepository>();
-builder.Services.AddScoped<IBackpackRepository, BackpackRepository>();
-builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
-builder.Services.AddScoped<IMonsterRepository, MonsterRepository>();
 
-builder.Services.AddScoped<ICombatService, CombatService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddHangfireServer();
 
-var app = builder.Build();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("SignedInOnly", policy => policy.RequireRole("Admin", "User")); // currently useless
+        });
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    });
+        var secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+        builder.Services.AddOptions();
+        builder.Services.AddMemoryCache();
+        builder.Services.Configure<ClientRateLimitOptions>(builder.Configuration.GetSection("ClientRateLimiting"));
+        builder.Services.Configure<ClientRateLimitPolicies>(builder.Configuration.GetSection("ClientRateLimitPolicies"));
+        builder.Services.AddInMemoryRateLimiting();
+        builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
+        builder.Services.AddScoped<IItemRepository, ItemRepository>();
+        builder.Services.AddScoped<IBackpackRepository, BackpackRepository>();
+        builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
+        builder.Services.AddScoped<IMonsterRepository, MonsterRepository>();
+
+        builder.Services.AddScoped<ICombatService, CombatService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+
+        builder.Services.AddScoped<IDatabaseUpdateService, DatabaseUpdateService>();
+
+        var app = builder.Build();
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
+        }
+
+        app.UseHangfireDashboard();
+
+        //refresh stamina every 00:00 UTC
+        RecurringJob.AddOrUpdate("myRecurringJob", () => Console.WriteLine("Recurring job execution"), "0 0 * * *");
+
+        app.UseHttpsRedirection();
+
+
+        app.UseClientRateLimiting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var databaseUpdateService = scope.ServiceProvider.GetRequiredService<IDatabaseUpdateService>();
+            databaseUpdateService.UpdateDatabase();
+        }
+
+        app.Run();
+
+    }
 }
-
-app.UseHttpsRedirection();
-
-
-app.UseClientRateLimiting();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
