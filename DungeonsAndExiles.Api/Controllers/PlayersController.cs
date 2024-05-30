@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
@@ -33,6 +34,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetPlayer([FromRoute] Guid playerId)
         {
             _logger.LogInformation("Attempting to get player with ID {PlayerId}", playerId);
@@ -59,6 +62,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetPlayersList()
         {
             _logger.LogInformation("Attempting to get players list");
@@ -85,6 +90,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
             _logger.LogInformation("Attempting to delete player with ID {PlayerId}", playerId);
@@ -110,6 +117,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> DeleteItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to delete item with ID {ItemId} from backpack for player with ID {PlayerId}", itemId, playerId);
@@ -135,6 +144,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> EquipItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to equip item with ID {ItemId} for player with ID {PlayerId}", itemId, playerId);
@@ -160,15 +171,26 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PlayerCombatWithMonster([FromRoute] Guid playerId, [FromRoute] Guid monsterId)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(499)]
+        public async Task<IActionResult> PlayerCombatWithMonster([FromRoute] Guid playerId, [FromRoute] Guid monsterId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Attempting to start combat between player with ID {PlayerId} and monster with ID {MonsterId}", playerId, monsterId);
 
             try
             {
+                //operation gonna take 10s to find a monster
+                await Task.Delay(10000, cancellationToken);
+
                 var result = await _playerRepository.CombatWithMonsterAsync(playerId, monsterId);
                 var message = result ? "You won" : "You lost";
                 return Ok(message);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Request was cancelled by the client.");
+                return StatusCode(499, "Request cancelled."); 
             }
             catch (NotFoundException ex)
             {

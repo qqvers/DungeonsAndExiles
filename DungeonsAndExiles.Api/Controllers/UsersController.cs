@@ -53,6 +53,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> Create([FromBody] UserRegisterDto userRegisterDto)
         {
             _logger.LogInformation("Attempting to register a new user");
@@ -85,9 +86,9 @@ namespace DungeonsAndExiles.Api.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
             _logger.LogInformation("Attempting to log in user with email {Email}", userLoginDto.Email);
@@ -139,6 +140,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
         {
             _logger.LogInformation("Attempting to get user with ID {UserId}", userId);
@@ -174,6 +177,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid userId, [FromBody] UserUpdateDto updatedUser)
         {
             _logger.LogInformation("Attempting to update user with ID {UserId}", userId);
@@ -214,6 +219,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid userId)
         {
             _logger.LogInformation("Attempting to delete user with ID {UserId}", userId);
@@ -245,6 +252,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpPost("{userId:Guid}/create-player")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> CreatePlayer([FromRoute] Guid userId, [FromBody] PlayerDto playerDto)
         {
             _logger.LogInformation("Attempting to create player for user with ID {UserId}", userId);
@@ -268,6 +277,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetListOfUserPlayers([FromRoute] Guid userId)
         {
             _logger.LogInformation("Attempting to get list of players for user with ID {UserId}", userId);
@@ -303,6 +314,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> Refresh([FromRoute] Guid userId, [FromBody] RefreshModel model)
         {
             _logger.LogInformation("Refresh called");

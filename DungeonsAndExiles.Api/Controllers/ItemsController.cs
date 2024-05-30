@@ -31,6 +31,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetItem([FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to get item with ID {ItemId}", itemId);
@@ -61,6 +63,8 @@ namespace DungeonsAndExiles.Api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> GetItemsList()
         {
             _logger.LogInformation("Attempting to get items list");
