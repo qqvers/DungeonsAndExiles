@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using AspNetCoreRateLimit;
+using FluentAssertions.Common;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -83,6 +85,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddOptions();
+builder.Services.AddMemoryCache();
+builder.Services.Configure<ClientRateLimitOptions>(builder.Configuration.GetSection("ClientRateLimiting"));
+builder.Services.Configure<ClientRateLimitPolicies>(builder.Configuration.GetSection("ClientRateLimitPolicies"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
@@ -92,6 +101,7 @@ builder.Services.AddScoped<IMonsterRepository, MonsterRepository>();
 
 builder.Services.AddScoped<ICombatService, CombatService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -107,6 +117,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
+app.UseClientRateLimiting();
 
 app.UseAuthentication();
 app.UseAuthorization();
