@@ -36,7 +36,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Arrange
             var sampleItem = new Item { Id = Guid.NewGuid(), Name = "Sword", Type = "Weapon", Damage = 30, Defence = 0 };
             var sampleItemVM = _mapper.Map<ItemVM>(sampleItem);
-            A.CallTo(() => _itemRepository.GetItemById(sampleItem.Id)).Returns(Task.FromResult(sampleItem));
+            A.CallTo(() => _itemRepository.GetItemById(sampleItem.Id)).Returns(Task.FromResult<Item?>(sampleItem));
 
 
             // Act
@@ -45,7 +45,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().BeEquivalentTo(sampleItemVM);
+            okResult?.Value.Should().BeEquivalentTo(sampleItemVM);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var nonExistentItemId = Guid.NewGuid();
-            A.CallTo(() => _itemRepository.GetItemById(nonExistentItemId)).Returns(Task.FromResult<Item>(null));
+            A.CallTo(() => _itemRepository.GetItemById(nonExistentItemId)).Returns(Task.FromResult<Item?>(null));
 
             // Act
             var result = await _itemsController.GetItem(nonExistentItemId);
@@ -61,7 +61,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
             var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult.Value.Should().BeEquivalentTo(new { message = $"Item with ID {nonExistentItemId} not found." });
+            notFoundResult?.Value.Should().BeEquivalentTo(new { message = $"Item with ID {nonExistentItemId} not found." });
         }
 
         [Fact]
@@ -78,13 +78,13 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().BeAssignableTo<List<ItemVM>>();
-            var returnValue = okResult.Value as List<ItemVM>;
+            okResult?.Value.Should().BeAssignableTo<List<ItemVM>>();
+            var returnValue = okResult?.Value as List<ItemVM>;
             returnValue.Should().HaveCount(3);
             returnValue.Should().BeEquivalentTo(sampleItemsVM);
         }
 
-        private List<Item> GetSampleItems()
+        private static List<Item> GetSampleItems()
         {
             return new List<Item>
             {

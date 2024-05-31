@@ -14,8 +14,8 @@
         public Guid EquipmentId { get; set; }
 
 
-        public User User { get; set; }
-        public Backpack Backpack { get; set; }
-        public Equipment Equipment { get; set; }
+        public User User { get; set; } = null!;
+        public Backpack Backpack { get; set; } = null!;
+        public Equipment Equipment { get; set; } = null!;
     }
 }

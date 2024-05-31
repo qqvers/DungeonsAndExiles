@@ -16,7 +16,9 @@ using FluentAssertions.Common;
 using Hangfire;
 using Hangfire.PostgreSql;
 using DungeonsAndExiles.Api.Services.DatabaseUpdate;
+using Hangfire.PostgreSql.Factories;
 
+namespace DungeonsAndExiles.Api;
 public class Program
 {
     private static void Main(string[] args)
@@ -51,7 +53,7 @@ public class Program
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
             });
 
@@ -69,17 +71,23 @@ public class Program
         var connectionString = Environment.GetEnvironmentVariable("DatabaseURL");
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            options.UseNpgsql(connectionString!, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
         });
 
         builder.Services.AddHangfire(configuration =>
+        {
             configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                          .UseSimpleAssemblyNameTypeSerializer()
                          .UseDefaultTypeSerializer()
-                         .UsePostgreSqlStorage(connectionString, new PostgreSqlStorageOptions
+                         .UsePostgreSqlStorage(options =>
                          {
-                             QueuePollInterval = TimeSpan.FromSeconds(15)
-                         }));
+                             options.UseNpgsqlConnection(connectionString!);
+                         });
+        });
+
+
+
+
 
 
         builder.Services.AddHangfireServer();
@@ -96,7 +104,7 @@ public class Program
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
@@ -138,7 +146,7 @@ public class Program
         app.UseHangfireDashboard();
 
         //refresh stamina every 00:00 UTC
-        RecurringJob.AddOrUpdate("myRecurringJob", () => Console.WriteLine("Recurring job execution"), "0 0 * * *");
+        RecurringJob.AddOrUpdate("refreshingStamina", () => Console.WriteLine("Refreshing stamina execution"), "0 0 * * *");
 
         app.UseHttpsRedirection();
 

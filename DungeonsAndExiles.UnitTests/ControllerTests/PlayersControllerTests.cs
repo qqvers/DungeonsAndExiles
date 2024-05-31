@@ -52,7 +52,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var playersList = new List<Player> { new Player { Id = Guid.NewGuid() } };
-            A.CallTo(() => _playerRepository.GetPlayerListAsync()).Returns(Task.FromResult(playersList));
+            A.CallTo(() => _playerRepository.GetPlayerListAsync()).Returns(Task.FromResult<List<Player>?>(playersList));
             var playersListVM = _mapper.Map<List<PlayerVM>>(playersList);
 
             // Act
@@ -67,7 +67,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         public async Task GetPlayersList_ReturnsNotFound_WhenNoPlayers()
         {
             // Arrange
-            A.CallTo(() => _playerRepository.GetPlayerListAsync()).Returns(Task.FromResult<List<Player>>(null));
+            A.CallTo(() => _playerRepository.GetPlayerListAsync()).Returns(Task.FromResult<List<Player>?>(null));
 
             // Act
             var result = await _controller.GetPlayersList();

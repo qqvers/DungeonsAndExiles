@@ -6,13 +6,13 @@ namespace DungeonsAndExiles.Api.Data
 {
     public class AppDbContext : DbContext
     {
-        public virtual DbSet<Backpack> Backpacks { get; set; }
-        public virtual DbSet<Equipment> Equipments { get; set; }
-        public virtual DbSet<Item> Items { get; set; }
-        public virtual DbSet<Monster> Monsters { get; set; }
-        public virtual DbSet<Player> Players { get; set; }
-        public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Backpack> Backpacks { get; set; } = null!;
+        public virtual DbSet<Equipment> Equipments { get; set; } = null!;
+        public virtual DbSet<Item> Items { get; set; } = null!;
+        public virtual DbSet<Monster> Monsters { get; set; } = null!;
+        public virtual DbSet<Player> Players { get; set; } = null!;
+        public virtual DbSet<User> Users { get; set; } = null!;
+        public virtual DbSet<Role> Roles { get; set; } = null!;
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
 

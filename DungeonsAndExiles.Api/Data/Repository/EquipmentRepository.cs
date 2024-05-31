@@ -20,12 +20,15 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
         public async Task<Equipment> GetEquipmentByIdAsync(Guid equipmentId)
         {
+            _logger.LogInformation($"Attempting to find equipment by ID");
             var equipment = await _appDbContext.Equipments.FindAsync(equipmentId);
             if (equipment == null)
             {
-                _logger.LogWarning($"Equipment with ID {equipmentId} not found");
-                throw new NotFoundException($"Equipment with ID {equipmentId} not found");
+                string message = $"Equipment with ID {equipmentId} not found";
+                throw new NotFoundException(message);
             }
+
+            _logger.LogInformation($"Equipment successfully found by ID");
             return equipment;
         }
     }

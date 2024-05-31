@@ -21,7 +21,7 @@ namespace DungeonsAndExiles.Api.Services.Jwt
             _secretKey = _configuration["SECRET_KEY"];
         }
 
-        public async Task<TokenResult> GenerateToken(User user, Role role)
+        public TokenResult GenerateToken(User user, Role role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secretKey);

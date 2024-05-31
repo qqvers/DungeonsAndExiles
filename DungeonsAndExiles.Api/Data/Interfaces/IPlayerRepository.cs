@@ -8,7 +8,7 @@ namespace DungeonsAndExiles.Api.Data.Interfaces
     {
         Task<Player> CreatePlayerAsync(PlayerDto playerDto, Guid userId);
         Task<Player> GetPlayerByIdAsync(Guid playerId);
-        Task<List<Player>> GetPlayerListAsync();
+        Task<List<Player>?> GetPlayerListAsync();
         Task<Player> UpdatePlayerAsync(Guid playerId, PlayerUpdateDto playerUpdateDto);
         Task<bool> DeletePlayerAsync(Guid playerId);
         Task<bool> AddItemToBackpackAsync(Guid playerId, Guid itemId);

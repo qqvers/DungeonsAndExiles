@@ -18,7 +18,11 @@ namespace DungeonsAndExiles.Api.Data.Repository
         {
             _logger.LogInformation("Attempting to retrieve monster list");
             var monsterList = await _appDbContext.Monsters.ToListAsync();
-            if(monsterList.Count == 0) { throw new NotFoundException("No monster found"); }
+            if(monsterList.Count == 0) {
+                var message = "No monster found";
+                throw new NotFoundException(message); 
+            }
+            _logger.LogInformation($"Monster list successfully retrieved");
 
             return monsterList;
         }

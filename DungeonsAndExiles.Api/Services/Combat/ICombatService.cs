@@ -7,6 +7,6 @@ namespace DungeonsAndExiles.Api.Services
     public interface ICombatService
     {
         public bool SimulateCombat(int playerStrength, int monsterStrength);
-        public Item SimulateDropAfterCombat(List<Item> items);
+        public Item? SimulateDropAfterCombat(List<Item> items);
     }
 }

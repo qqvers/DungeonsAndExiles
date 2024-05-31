@@ -6,7 +6,7 @@
         public Guid PlayerId { get; set; }
 
         public List<Item> Items { get; set; } = new List<Item>();
-        public Player Player { get; set; }
+        public Player Player { get; set; } = null!;
 
     }
 }

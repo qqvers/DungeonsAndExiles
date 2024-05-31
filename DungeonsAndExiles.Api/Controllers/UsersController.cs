@@ -20,6 +20,7 @@ using System.Linq;
 using DungeonsAndExiles.Api.Models.Authentication;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Cryptography;
+using BCrypt.Net;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
@@ -33,18 +34,15 @@ namespace DungeonsAndExiles.Api.Controllers
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<UsersController> _logger;
-        private readonly IConfiguration _configuration;
 
         public UsersController(IUserRepository userRepository, IJwtService jwtService, 
-            IPlayerRepository playerRepository, IMapper mapper, ILogger<UsersController> logger, IConfiguration configuration)
+            IPlayerRepository playerRepository, IMapper mapper, ILogger<UsersController> logger)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
             _playerRepository = playerRepository;
             _mapper = mapper;
             _logger = logger;
-            string secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
-            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -114,7 +112,7 @@ namespace DungeonsAndExiles.Api.Controllers
                 }
 
                 var role = await _userRepository.GetUserRole(user.RoleId);
-                var token = await _jwtService.GenerateToken(user, role);
+                var token = _jwtService.GenerateToken(user, role);
                 var refreshToken = GenerateRefreshToken();
 
                 user.RefreshToken = refreshToken;
@@ -332,7 +330,7 @@ namespace DungeonsAndExiles.Api.Controllers
                 return Unauthorized();
 
             var role = await _userRepository.GetUserRole(user.RoleId);
-            var tokenResult = await _jwtService.GenerateToken(user, role);
+            var tokenResult = _jwtService.GenerateToken(user, role);
 
             _logger.LogInformation("Refresh succeeded");
 

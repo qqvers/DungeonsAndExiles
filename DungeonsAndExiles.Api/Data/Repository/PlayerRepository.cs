@@ -54,7 +54,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             var item = await _itemRepository.GetItemById(itemId);
             var backpack = await _backpackRepository.GetBackpackByIdAsync(player.BackpackId);
 
-            backpack.Items.Add(item);
+            backpack.Items.Add(item!);
 
             _appDbContext.Backpacks.Update(backpack);
             await _appDbContext.SaveChangesAsync();
@@ -137,16 +137,14 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (backpack == null || equipment == null)
             {
-                _logger.LogError("Backpack or equipment not found for player with ID {PlayerId}", playerId);
                 throw new NotFoundException("Backpack or equipment not found.");
             }
 
-            var currentEquippedItem = equipment.Items.FirstOrDefault(i => i.Type == item.Type);
+            var currentEquippedItem = equipment.Items.FirstOrDefault(i => i.Type == item!.Type);
             var currentItemInBackpack = backpack.Items.FirstOrDefault(i => i.Id == itemId);
 
             if (currentItemInBackpack == null)
             {
-                _logger.LogWarning("Item with ID {ItemId} not found in backpack for player with ID {PlayerId}", itemId, playerId);
                 throw new NotFoundException($"Item with ID {itemId} not found in backpack.");
             }
 
@@ -180,17 +178,15 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if(player.Stamina == 0)
             {
-                _logger.LogWarning("Player can not start a combat with 0 stamina");
                 throw new PlayerCombatValidationException($"Player can not start a combat with 0 stamina.");
             }
 
             if (playerBackpack.Capacity == playerBackpack.Items.Count)
             {
-                _logger.LogWarning("Player can not start a combat with no space in backpack");
                 throw new PlayerCombatValidationException("Player can not start a combat with no space in backpack");
             }
 
-            //operation gonna take 10s to find a monster
+            //operation gonna take 10s to find a monster, also simulates long request
             await Task.Delay(10000, cancellationToken);
 
             var monstersList = await _monsterRepository.MonstersList();
@@ -200,7 +196,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (monster == null)
             {
-                _logger.LogWarning("Monster with ID {MonsterId} does not exist", monsterId);
                 throw new NotFoundException($"Monster with ID {monsterId} does not exist");
             }
 
@@ -240,7 +235,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
                 }
             }
 
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync(CancellationToken.None);
             _logger.LogInformation("Combat between player with ID {PlayerId} and monster with ID {MonsterId} completed. Result: {Result}", playerId, monsterId, combatResult);
             return combatResult;
         }
@@ -253,14 +248,13 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (player == null)
             {
-                _logger.LogWarning("Player with ID {PlayerId} not found", playerId);
                 throw new NotFoundException($"Player with ID {playerId} not found.");
             }
-
+            _logger.LogInformation("Player with ID {PlayerId} successfully found.", playerId);
             return player;
         }
 
-        public async Task<List<Player>> GetPlayerListAsync()
+        public async Task<List<Player>?> GetPlayerListAsync()
         {
             _logger.LogInformation("Attempting to retrieve list of all players");
 
@@ -281,14 +275,12 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (backpack == null)
             {
-                _logger.LogWarning("Backpack with ID {BackpackId} not found for player with ID {PlayerId}", player.BackpackId, playerId);
                 throw new NotFoundException($"Backpack with ID {player.BackpackId} not found.");
             }
 
             var itemInBackpack = backpack.Items.FirstOrDefault(i => i.Id == itemId);
             if (itemInBackpack == null)
             {
-                _logger.LogWarning("Item with ID {ItemId} not found in backpack with ID {BackpackId}", itemId, backpack.Id);
                 throw new NotFoundException($"Item with ID {itemId} not found in backpack with ID {backpack.Id}");
             }
 
@@ -334,7 +326,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (equipmentItems == null)
             {
-                _logger.LogWarning("Equipment for player with ID {PlayerId} not found", playerId);
                 throw new NotFoundException($"Equipment for player with ID {playerId} not found.");
             }
 
@@ -360,7 +351,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (backpackItems == null)
             {
-                _logger.LogWarning("Backpack for player with ID {PlayerId} not found", playerId);
                 throw new NotFoundException($"Backpack for player with ID {playerId} not found.");
             }
 
@@ -369,7 +359,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
         public async Task<List<Player>> GetPlayersByUserIdAsync(Guid userId)
         {
-            _logger.LogInformation("Attempting to retrieve players for user with ID {UserId}", userId);
             return await _appDbContext.Players.Where(p => p.UserId == userId).ToListAsync();
         }
     }

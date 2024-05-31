@@ -35,7 +35,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
                 .AnyAsync(o => o.Email == userRegisterDto.Email);
             if (existingCustomer)
             {
-                _logger.LogWarning("Email {Email} already in use by another customer", userRegisterDto.Email);
                 throw new InvalidOperationException("Email already in use by another customer");
             }
 
@@ -44,7 +43,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (defaultRole == null)
             {
-                _logger.LogError("Role User not found");
                 throw new NotFoundException("Role User not found");
             }
             newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
@@ -57,7 +55,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             return newUser;
         }
 
-        public async Task<User> FindUserInDatabase(UserLoginDto userLoginDto)
+        public async Task<User?> FindUserInDatabase(UserLoginDto userLoginDto)
         {
             if (userLoginDto == null)
                 throw new ArgumentNullException(nameof(userLoginDto));
@@ -69,13 +67,14 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (loggedUser == null)
             {
-                _logger.LogWarning("User with email {Email} not found", userLoginDto.Email);
+                var message = $"User with email {userLoginDto.Email} not found";
+                throw new NotFoundException(message);
             }
 
             return loggedUser;
         }
 
-        public async Task<User> FindUserByIdAsync(Guid userId)
+        public async Task<User?> FindUserByIdAsync(Guid userId)
         {
             _logger.LogInformation("Attempting to find user with ID: {UserId}", userId);
 
@@ -83,7 +82,8 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             if (user == null)
             {
-                _logger.LogWarning("User with ID {UserId} not found", userId);
+                var message = $"User with ID {userId} not found";
+                throw new NotFoundException(message);
             }
 
             return user;
@@ -96,15 +96,13 @@ namespace DungeonsAndExiles.Api.Data.Repository
             var currentUser = await _appDbContext.Users.FindAsync(userId);
             if (currentUser == null)
             {
-                _logger.LogError("User with ID {UserId} not found", userId);
-                throw new ArgumentNullException(nameof(currentUser));
+                throw new NotFoundException($"User with ID {userId} not found");
             }
 
             var emailInDatabase = await _appDbContext.Users.FirstOrDefaultAsync(x => x.Email == userUpdateDto.Email);
 
             if (emailInDatabase != null)
             {
-                _logger.LogWarning("Email {Email} is taken by another user", userUpdateDto.Email);
                 throw new InvalidOperationException("Selected email is taken by other user");
             }
 
@@ -145,7 +143,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
             var role = await _appDbContext.Roles.FindAsync(roleId);
             if (role == null)
             {
-                _logger.LogWarning("Role with ID {RoleId} does not exist", roleId);
                 throw new NotFoundException($"Role with ID {roleId} does not exist");
             }
 

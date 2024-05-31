@@ -36,12 +36,12 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().BeAssignableTo<List<Monster>>();
-            var returnValue = okResult.Value as List<Monster>;
+            okResult?.Value.Should().BeAssignableTo<List<Monster>>();
+            var returnValue = okResult?.Value as List<Monster>;
             returnValue.Should().HaveCount(3);
         }
 
-        private List<Monster> GetSampleMonsters()
+        private static List<Monster> GetSampleMonsters()
         {
             return new List<Monster>
             {

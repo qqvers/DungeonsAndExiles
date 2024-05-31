@@ -10,6 +10,6 @@ namespace DungeonsAndExiles.Api.Services.Jwt
 {
     public interface IJwtService
     {
-        Task<TokenResult> GenerateToken(User user, Role role);
+        TokenResult GenerateToken(User user, Role role);
     }
 }

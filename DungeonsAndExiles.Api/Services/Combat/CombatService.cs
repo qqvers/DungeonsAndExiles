@@ -37,7 +37,7 @@ namespace DungeonsAndExiles.Api.Services.Combat
             }
         }
 
-        public Item SimulateDropAfterCombat(List<Item> items)
+        public Item? SimulateDropAfterCombat(List<Item> items)
         {
             if (_random.NextDouble() < 0.5)
             {

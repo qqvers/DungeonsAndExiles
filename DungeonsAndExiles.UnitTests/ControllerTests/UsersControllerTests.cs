@@ -24,7 +24,6 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<UsersController> _logger;
-        private readonly IConfiguration _configuration;
 
 
         public UsersControllerTests()
@@ -38,8 +37,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             });
             _mapper = config.CreateMapper();
             _logger = A.Fake<ILogger<UsersController>>();
-            _configuration = A.Fake<IConfiguration>();
-            _usersController = new UsersController(_userRepository, _jwtService, _playerRepository, _mapper, _logger, _configuration);
+            _usersController = new UsersController(_userRepository, _jwtService, _playerRepository, _mapper, _logger);
         }
 
         [Fact]
@@ -57,7 +55,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<CreatedResult>();
             var createdResult = result as CreatedResult;
-            createdResult.Value.Should().BeEquivalentTo(userVM);
+            createdResult?.Value.Should().BeEquivalentTo(userVM);
         }
 
         [Fact]
@@ -65,7 +63,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var userLoginDto = new UserLoginDto { Email = "test@example.com", Password = "Password123" };
-            A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Returns(Task.FromResult<User>(null));
+            A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Returns(Task.FromResult<User?>(null));
 
             // Act
             var result = await _usersController.Login(userLoginDto);
@@ -73,7 +71,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
             var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult.Value.Should().Be("Provided email does not exist in database");
+            notFoundResult?.Value.Should().Be("Provided email does not exist in database");
         }
 
         [Fact]
@@ -82,7 +80,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Arrange
             var userLoginDto = new UserLoginDto { Email = "test@example.com", Password = "WrongPassword" };
             var user = new User { Id = Guid.NewGuid(), Email = "test@example.com", Password = BCrypt.Net.BCrypt.HashPassword("Password123") };
-            A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Returns(Task.FromResult(user));
+            A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Returns(Task.FromResult<User?>(user));
 
             // Act
             var result = await _usersController.Login(userLoginDto);
@@ -90,7 +88,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<UnauthorizedObjectResult>();
             var unauthorizedResult = result as UnauthorizedObjectResult;
-            unauthorizedResult.Value.Should().Be("Incorrect password");
+            unauthorizedResult?.Value.Should().Be("Incorrect password");
         }
 
         [Fact]
@@ -99,7 +97,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Arrange
             var userId = Guid.NewGuid();
             var user = new User { Id = userId, Email = "test@example.com" };
-            A.CallTo(() => _userRepository.FindUserByIdAsync(userId)).Returns(Task.FromResult(user));
+            A.CallTo(() => _userRepository.FindUserByIdAsync(userId)).Returns(Task.FromResult<User?>(user));
             var userVM = _mapper.Map<UserVM>(user);
 
             // Act
@@ -108,7 +106,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().BeEquivalentTo(userVM);
+            okResult?.Value.Should().BeEquivalentTo(userVM);
         }
 
         [Fact]
@@ -116,7 +114,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var userId = Guid.NewGuid();
-            A.CallTo(() => _userRepository.FindUserByIdAsync(userId)).Returns(Task.FromResult<User>(null));
+            A.CallTo(() => _userRepository.FindUserByIdAsync(userId)).Returns(Task.FromResult<User?>(null));
 
             // Act
             var result = await _usersController.GetUserById(userId);
@@ -124,7 +122,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
             var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult.Value.Should().Be("User with that Id does not exist");
+            notFoundResult?.Value.Should().Be("User with that Id does not exist");
         }
 
         [Fact]
@@ -141,7 +139,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult.Value.Should().Be("User updated");
+            okResult?.Value.Should().Be("User updated");
         }
 
         [Fact]
@@ -158,7 +156,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
             var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult.Value.Should().Be("User not found or could not be updated");
+            notFoundResult?.Value.Should().Be("User not found or could not be updated");
         }
 
         [Fact]
@@ -188,7 +186,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
             var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult.Value.Should().Be("User not found or could not be deleted");
+            notFoundResult?.Value.Should().Be("User not found or could not be deleted");
         }
 
         [Fact]
@@ -208,7 +206,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Assert
             result.Should().BeOfType<CreatedResult>();
             var createdResult = result as CreatedResult;
-            createdResult.Value.Should().BeEquivalentTo(playerVM);
+            createdResult?.Value.Should().BeEquivalentTo(playerVM);
         }
 
         [Fact]
