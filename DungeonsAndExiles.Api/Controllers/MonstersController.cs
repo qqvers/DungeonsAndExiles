@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
+    /// <summary>
+    /// Handle operations related to monsters.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Policy = "SignedInOnly")]
@@ -22,6 +25,15 @@ namespace DungeonsAndExiles.Api.Controllers
             _logger = logger;
         }
 
+
+        /// <summary>
+        /// Retrieves the list of all monsters.
+        /// </summary>
+        /// <returns>A list of monsters</returns>
+        /// <response code="200">Returns the list of monsters</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

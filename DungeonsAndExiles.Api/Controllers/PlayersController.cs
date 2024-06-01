@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
+    /// <summary>
+    /// Handle operations related to players.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Policy = "SignedInOnly")]
@@ -30,6 +33,16 @@ namespace DungeonsAndExiles.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gets a player by their ID.
+        /// </summary>
+        /// <param name="playerId">The ID of the player</param>
+        /// <returns>The requested player</returns>
+        /// <response code="200">Returns the requested player</response>
+        /// <response code="404">If the player is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpGet("{playerId:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -58,6 +71,15 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets a list of all players.
+        /// </summary>
+        /// <returns>A list of players</returns>
+        /// <response code="200">Returns the list of players</response>
+        /// <response code="404">If no players are found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,6 +108,15 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes a player by their ID.
+        /// </summary>
+        /// <param name="playerId">The ID of the player to delete</param>
+        /// <response code="204">If the player is successfully deleted</response>
+        /// <response code="404">If the player is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpDelete("{playerId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -113,6 +144,16 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes an item from a player's backpack by the item's ID.
+        /// </summary>
+        /// <param name="playerId">The ID of the player</param>
+        /// <param name="itemId">The ID of the item to delete</param>
+        /// <response code="204">If the item is successfully deleted</response>
+        /// <response code="404">If the item is not found in the player's backpack</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpDelete("{playerId:Guid}/backpacks/items/{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -140,6 +181,16 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Equips an item for a player.
+        /// </summary>
+        /// <param name="playerId">The ID of the player</param>
+        /// <param name="itemId">The ID of the item to equip</param>
+        /// <response code="204">If the item is successfully equipped</response>
+        /// <response code="404">If the item is not found for the player</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpPost("{playerId:Guid}/items/{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -167,6 +218,20 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Initiates combat between a player and a monster.
+        /// </summary>
+        /// <param name="playerId">The ID of the player</param>
+        /// <param name="monsterId">The ID of the monster</param>
+        /// <param name="cancellationToken">Token to cancel the operation</param>
+        /// <returns>Result of the combat</returns>
+        /// <response code="200">If the combat result is successfully returned</response>
+        /// <response code="404">If the player or monster is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="400">If the player cannot start combat</response>
+        /// <response code="499">If the request is cancelled by the client</response>
         [HttpPost("{playerId:Guid}/monsters/{monsterId:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -207,6 +272,14 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the list of items in a player's backpack.
+        /// </summary>
+        /// <param name="playerId">The ID of the player</param>
+        /// <returns>The list of items in the player's backpack</returns>
+        /// <response code="200">Returns the list of items</response>
+        /// <response code="404">If no items are found in the backpack</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpGet("{playerId:Guid}/backpacks/items")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -233,6 +306,14 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the list of items in a player's equipment.
+        /// </summary>
+        /// <param name="playerId">The ID of the player</param>
+        /// <returns>The list of items in the player's equipment</returns>
+        /// <response code="200">Returns the list of items</response>
+        /// <response code="404">If no items are found in the equipment</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpGet("{playerId:Guid}/equipments/items")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

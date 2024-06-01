@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
+    /// <summary>
+    /// Handle operations related to items.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Policy = "SignedInOnly")]
@@ -27,6 +30,16 @@ namespace DungeonsAndExiles.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gets an item by its ID.
+        /// </summary>
+        /// <param name="itemId">The ID of the item</param>
+        /// <returns>The requested item</returns>
+        /// <response code="200">Returns the requested item</response>
+        /// <response code="404">If the item is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpGet("{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -60,6 +73,14 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets a list of all items.
+        /// </summary>
+        /// <returns>A list of items</returns>
+        /// <response code="200">Returns the list of items</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

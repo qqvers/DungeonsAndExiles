@@ -57,8 +57,9 @@ public class Program
         }
             });
 
-            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
         });
 
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
@@ -94,7 +95,7 @@ public class Program
 
         builder.Services.AddAuthorization(options =>
         {
-            options.AddPolicy("SignedInOnly", policy => policy.RequireRole("Admin", "User")); // currently useless
+            options.AddPolicy("SignedInOnly", policy => policy.RequireRole("Admin", "User")); // currently works the same as [Authorize], left for further development
         });
 
         var secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");

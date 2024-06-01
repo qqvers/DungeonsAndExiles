@@ -24,6 +24,9 @@ using BCrypt.Net;
 
 namespace DungeonsAndExiles.Api.Controllers
 {
+    /// <summary>
+    /// Handle operations related to users.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
@@ -45,6 +48,26 @@ namespace DungeonsAndExiles.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Registers a new user.
+        /// </summary>
+        /// <param name="userRegisterDto">User registration data</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /api/users/register
+        ///     {
+        ///         "email": "user@example.com",
+        ///         "password": "P@ssword123",
+        ///         "confirmPassword": "P@ssword123"
+        ///     }
+        /// </remarks>
+        /// <returns>The created user</returns>
+        /// <response code="201">Returns the newly created user</response>
+        /// <response code="400">If the user registration data is invalid</response>
+        /// <response code="409">If there is a conflict during user registration</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpPost("register")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -80,6 +103,25 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Logs in a user.
+        /// </summary>
+        /// <param name="userLoginDto">User login data</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /api/users/login
+        ///     {
+        ///         "email": "user@example.com",
+        ///         "password": "P@ssword123"
+        ///     }
+        /// </remarks>
+        /// <returns>A token and refresh token for the logged in user</returns>
+        /// <response code="200">Returns the token and refresh token</response>
+        /// <response code="400">If the user login data is invalid</response>
+        /// <response code="404">If the user is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpPost("login")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -132,6 +174,18 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Retrieves a user by their ID.
+        /// </summary>
+        /// <param name="userId">The ID of the user to retrieve</param>
+        /// <returns>The user with the specified ID</returns>
+        /// <response code="200">Returns the user</response>
+        /// <response code="400">If the user ID is invalid</response>
+        /// <response code="404">If the user is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpGet("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -169,6 +223,27 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user to update</param>
+        /// <param name="updatedUser">The updated user data</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /api/users/{userId}
+        ///     {
+        ///         "email": "updateduser@example.com",
+        ///         "password": "NewP@ssword123"
+        ///     }
+        /// </remarks>
+        /// <returns>A message indicating the result of the update</returns>
+        /// <response code="200">Returns a message indicating the user was updated</response>
+        /// <response code="400">If the user update data is invalid</response>
+        /// <response code="404">If the user is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpPut("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -211,6 +286,17 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user to delete</param>
+        /// <returns>No content</returns>
+        /// <response code="204">If the user was deleted successfully</response>
+        /// <response code="400">If the user ID is invalid</response>
+        /// <response code="404">If the user is not found</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpDelete("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -247,6 +333,25 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Creates a new player for a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user</param>
+        /// <param name="playerDto">The player data</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /api/users/{userId}/create-player
+        ///     {
+        ///         "name": "PlayerName",
+        ///         "level": 1
+        ///     }
+        /// </remarks>
+        /// <returns>The created player</returns>
+        /// <response code="201">Returns the newly created player</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpPost("{userId:Guid}/create-player")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -269,6 +374,17 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the list of players for a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user</param>
+        /// <returns>A list of players for the user</returns>
+        /// <response code="200">Returns the list of players</response>
+        /// <response code="400">If the user ID is invalid</response>
+        /// <response code="404">If no players are found for the user</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user is unauthorized</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpGet("{userId:Guid}/players")]
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -306,6 +422,25 @@ namespace DungeonsAndExiles.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Refreshes a user's token.
+        /// </summary>
+        /// <param name="userId">The ID of the user</param>
+        /// <param name="model">The refresh token model</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /api/users/{userId}/refresh
+        ///     {
+        ///         "refreshToken": "SomeRefreshToken"
+        ///     }
+        /// </remarks>
+        /// <returns>A new token and refresh token for the user</returns>
+        /// <response code="200">Returns the new token and refresh token</response>
+        /// <response code="400">If the user ID is invalid</response>
+        /// <response code="401">If the refresh token is invalid or expired</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="429">If the request limit is exceeded</response>
         [HttpPost("{userId:Guid}/refresh")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
