@@ -52,16 +52,6 @@ namespace DungeonsAndExiles.Api.Controllers
         /// Registers a new user.
         /// </summary>
         /// <param name="userRegisterDto">User registration data</param>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     POST /api/users/register
-        ///     {
-        ///         "email": "user@example.com",
-        ///         "password": "P@ssword123",
-        ///         "confirmPassword": "P@ssword123"
-        ///     }
-        /// </remarks>
         /// <returns>The created user</returns>
         /// <response code="201">Returns the newly created user</response>
         /// <response code="400">If the user registration data is invalid</response>
@@ -107,15 +97,6 @@ namespace DungeonsAndExiles.Api.Controllers
         /// Logs in a user.
         /// </summary>
         /// <param name="userLoginDto">User login data</param>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     POST /api/users/login
-        ///     {
-        ///         "email": "user@example.com",
-        ///         "password": "P@ssword123"
-        ///     }
-        /// </remarks>
         /// <returns>A token and refresh token for the logged in user</returns>
         /// <response code="200">Returns the token and refresh token</response>
         /// <response code="400">If the user login data is invalid</response>
@@ -228,15 +209,6 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <param name="userId">The ID of the user to update</param>
         /// <param name="updatedUser">The updated user data</param>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     PUT /api/users/{userId}
-        ///     {
-        ///         "email": "updateduser@example.com",
-        ///         "password": "NewP@ssword123"
-        ///     }
-        /// </remarks>
         /// <returns>A message indicating the result of the update</returns>
         /// <response code="200">Returns a message indicating the user was updated</response>
         /// <response code="400">If the user update data is invalid</response>
@@ -338,15 +310,6 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <param name="userId">The ID of the user</param>
         /// <param name="playerDto">The player data</param>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     POST /api/users/{userId}/create-player
-        ///     {
-        ///         "name": "PlayerName",
-        ///         "level": 1
-        ///     }
-        /// </remarks>
         /// <returns>The created player</returns>
         /// <response code="201">Returns the newly created player</response>
         /// <response code="500">If there was an internal server error</response>
@@ -427,14 +390,6 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <param name="userId">The ID of the user</param>
         /// <param name="model">The refresh token model</param>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     POST /api/users/{userId}/refresh
-        ///     {
-        ///         "refreshToken": "SomeRefreshToken"
-        ///     }
-        /// </remarks>
         /// <returns>A new token and refresh token for the user</returns>
         /// <response code="200">Returns the new token and refresh token</response>
         /// <response code="400">If the user ID is invalid</response>
