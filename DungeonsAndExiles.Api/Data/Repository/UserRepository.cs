@@ -91,7 +91,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             var currentUser = await _appDbContext.Users.FindAsync(userId) ?? throw new NotFoundException($"User with ID {userId} not found");
             var emailInDatabase = await _appDbContext.Users.FirstOrDefaultAsync(x => x.Email == userUpdateDto.Email);
 
-            if (emailInDatabase != null)
+            if (emailInDatabase != null && currentUser.Email != userUpdateDto.Email)
             {
                 throw new InvalidOperationException("Selected email is taken by other user");
             }

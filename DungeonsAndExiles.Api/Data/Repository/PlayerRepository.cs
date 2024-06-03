@@ -67,6 +67,13 @@ namespace DungeonsAndExiles.Api.Data.Repository
         {
             _logger.LogInformation("Attempting to create a new player for user with ID {UserId}", userId);
 
+            var playerInDatabase = _appDbContext.Players.Any(p => p.Name == playerDto.Name);
+            if (playerInDatabase)
+            {
+                throw new ArgumentException("Player with that name already exists");
+            }
+
+
             var player = _mapper.Map<Player>(playerDto);
             player.Id = Guid.NewGuid();
 

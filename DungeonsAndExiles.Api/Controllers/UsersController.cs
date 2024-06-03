@@ -215,6 +215,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpPut("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -223,9 +224,17 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid userId, [FromBody] UserUpdateDto updatedUser)
         {
             _logger.LogInformation("Attempting to update user with ID {UserId}", userId);
+            var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (loggedInUserId != userId.ToString())
+            {
+                _logger.LogWarning("User does not have permission");
+                return Forbid();
+            }
             try
             {
                 if (!ModelState.IsValid)
@@ -268,6 +277,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="403">If the authenticated user does not have permission to delete the specified user</response>
         [HttpDelete("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -276,9 +286,17 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid userId)
         {
             _logger.LogInformation("Attempting to delete user with ID {UserId}", userId);
+            var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (loggedInUserId != userId.ToString())
+            {
+                _logger.LogWarning("User does not have permission");
+                return Forbid();
+            }
             try
             {
                 if (userId == Guid.Empty)
@@ -314,20 +332,36 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response> 
+        /// <response code="400">If player name is not unique</response> 
         [HttpPost("{userId:Guid}/create-player")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreatePlayer([FromRoute] Guid userId, [FromBody] PlayerDto playerDto)
         {
             _logger.LogInformation("Attempting to create player for user with ID {UserId}", userId);
-            try
+            var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (loggedInUserId != userId.ToString())
             {
+                _logger.LogWarning("User does not have permission");
+                return Forbid();
+            }
+            try
+            { 
                 var player = await _playerRepository.CreatePlayerAsync(playerDto, userId);
                 var playerVM = _mapper.Map<PlayerVM>(player);
                 _logger.LogInformation("Player created successfully for user with ID {UserId}", userId);
                 return Created("", playerVM);
+            }
+            catch(ArgumentException ex)
+            {
+                _logger.LogError(ex, "Player name is not unique");
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

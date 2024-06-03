@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -115,16 +116,26 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpDelete("{playerId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> DeletePlayer([FromRoute] Guid playerId)
         {
             _logger.LogInformation("Attempting to delete player with ID {PlayerId}", playerId);
+            var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var player = await _playerRepository.GetPlayerByIdAsync(playerId);
+            var userId = player.UserId;
 
+            if (loggedInUserId != userId.ToString())
+            {
+                _logger.LogWarning("User does not have permission");
+                return Forbid();
+            }
             try
             {
                 await _playerRepository.DeletePlayerAsync(playerId);
@@ -152,16 +163,26 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpDelete("{playerId:Guid}/backpacks/items/{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> DeleteItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to delete item with ID {ItemId} from backpack for player with ID {PlayerId}", itemId, playerId);
+            var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var player = await _playerRepository.GetPlayerByIdAsync(playerId);
+            var userId = player.UserId;
 
+            if (loggedInUserId != userId.ToString())
+            {
+                _logger.LogWarning("User does not have permission");
+                return Forbid();
+            }
             try
             {
                 await _playerRepository.RemoveItemFromBackpackAsync(playerId, itemId);
@@ -189,16 +210,26 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpPost("{playerId:Guid}/items/{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> EquipItem([FromRoute] Guid playerId, [FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to equip item with ID {ItemId} for player with ID {PlayerId}", itemId, playerId);
+            var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var player = await _playerRepository.GetPlayerByIdAsync(playerId);
+            var userId = player.UserId;
 
+            if (loggedInUserId != userId.ToString())
+            {
+                _logger.LogWarning("User does not have permission");
+                return Forbid();
+            }
             try
             {
                 await _playerRepository.EquipItemAsync(playerId, itemId);
@@ -230,6 +261,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="429">If the request limit is exceeded</response>
         /// <response code="400">If the player cannot start combat</response>
         /// <response code="499">If the request is cancelled by the client</response>
+        /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpPost("{playerId:Guid}/monsters/{monsterId:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -237,11 +269,20 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(499)]
         public async Task<IActionResult> PlayerCombatWithMonster([FromRoute] Guid playerId, [FromRoute] Guid monsterId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Attempting to start combat between player with ID {PlayerId} and monster with ID {MonsterId}", playerId, monsterId);
+            var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var player = await _playerRepository.GetPlayerByIdAsync(playerId);
+            var userId = player.UserId;
 
+            if (loggedInUserId != userId.ToString())
+            {
+                _logger.LogWarning("User does not have permission");
+                return Forbid();
+            }
             try
             {
                 var result = await _playerRepository.CombatWithMonsterAsync(playerId, monsterId, cancellationToken);
