@@ -34,11 +34,13 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="404">If no monsters are found</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMonstersList()
         {
             _logger.LogInformation("Attempting to get monsters list");
@@ -47,6 +49,11 @@ namespace DungeonsAndExiles.Api.Controllers
                 var monstersList = await _monsterRepository.MonstersList();
                 _logger.LogInformation("Monsters list retrieved successfully");
                 return Ok(monstersList);
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogError(ex.Message);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {

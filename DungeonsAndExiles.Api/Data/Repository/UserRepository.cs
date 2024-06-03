@@ -39,12 +39,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             }
 
             var newUser = _mapper.Map<User>(userRegisterDto);
-            var defaultRole = await _appDbContext.Roles.FirstOrDefaultAsync(n => n.Name == "User");
-
-            if (defaultRole == null)
-            {
-                throw new NotFoundException("Role User not found");
-            }
+            var defaultRole = await _appDbContext.Roles.FirstOrDefaultAsync(n => n.Name == "User") ?? throw new NotFoundException("Role User not found");
             newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
             newUser.RoleId = defaultRole.Id;
 
@@ -89,16 +84,11 @@ namespace DungeonsAndExiles.Api.Data.Repository
             return user;
         }
 
-        public async Task<bool> UpdateUserAsync(Guid userId, UserUpdateDto userUpdateDto)
+        public async Task UpdateUserAsync(Guid userId, UserUpdateDto userUpdateDto)
         {
             _logger.LogInformation("Attempting to update user with ID: {UserId}", userId);
 
-            var currentUser = await _appDbContext.Users.FindAsync(userId);
-            if (currentUser == null)
-            {
-                throw new NotFoundException($"User with ID {userId} not found");
-            }
-
+            var currentUser = await _appDbContext.Users.FindAsync(userId) ?? throw new NotFoundException($"User with ID {userId} not found");
             var emailInDatabase = await _appDbContext.Users.FirstOrDefaultAsync(x => x.Email == userUpdateDto.Email);
 
             if (emailInDatabase != null)
@@ -113,7 +103,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             _logger.LogInformation("User with ID {UserId} updated successfully", userId);
 
-            return true;
         }
 
         public async Task<bool> DeleteUserAsync(Guid userId)
@@ -140,24 +129,18 @@ namespace DungeonsAndExiles.Api.Data.Repository
         {
             _logger.LogInformation("Attempting to find role with ID: {RoleId}", roleId);
 
-            var role = await _appDbContext.Roles.FindAsync(roleId);
-            if (role == null)
-            {
-                throw new NotFoundException($"Role with ID {roleId} does not exist");
-            }
-
+            var role = await _appDbContext.Roles.FindAsync(roleId) ?? throw new NotFoundException($"Role with ID {roleId} does not exist");
             _logger.LogInformation("Role with ID {RoleId} found successfully", roleId);
 
             return role;
         }
 
-        public async Task<bool> UpdateUserToken(User user)
+        public async Task UpdateUserToken(User user)
         {
             _logger.LogInformation("Attempting to update token for user with ID: {user.Id}", user.Id);
             _appDbContext.Users.Update(user);
             await _appDbContext.SaveChangesAsync();
             _logger.LogInformation("Token updated successfully for user with {user.Id}", user.Id);
-            return true;
         }
     }
 }

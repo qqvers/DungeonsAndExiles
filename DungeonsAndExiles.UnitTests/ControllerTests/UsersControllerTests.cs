@@ -4,6 +4,7 @@ using DungeonsAndExiles.Api.Controllers;
 using DungeonsAndExiles.Api.Data.Interfaces;
 using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.DTOs.User;
+using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Models.Domain;
 using DungeonsAndExiles.Api.Models.Profiles;
 using DungeonsAndExiles.Api.Services.Jwt;
@@ -63,15 +64,13 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var userLoginDto = new UserLoginDto { Email = "test@example.com", Password = "Password123" };
-            A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Returns(Task.FromResult<User?>(null));
+            A.CallTo(() => _userRepository.FindUserInDatabase(userLoginDto)).Throws<NotFoundException>();
 
             // Act
             var result = await _usersController.Login(userLoginDto);
 
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
-            var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult?.Value.Should().Be("Provided email does not exist in database");
         }
 
         [Fact]
@@ -114,15 +113,13 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var userId = Guid.NewGuid();
-            A.CallTo(() => _userRepository.FindUserByIdAsync(userId)).Returns(Task.FromResult<User?>(null));
+            A.CallTo(() => _userRepository.FindUserByIdAsync(userId)).Throws<NotFoundException>();
 
             // Act
             var result = await _usersController.GetUserById(userId);
 
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
-            var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult?.Value.Should().Be("User with that Id does not exist");
         }
 
         [Fact]
@@ -148,15 +145,13 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             // Arrange
             var userId = Guid.NewGuid();
             var userUpdateDto = new UserUpdateDto { Email = "updated@example.com", Password = "UpdatedPassword123" };
-            A.CallTo(() => _userRepository.UpdateUserAsync(userId, userUpdateDto)).Returns(Task.FromResult(false));
+            A.CallTo(() => _userRepository.UpdateUserAsync(userId, userUpdateDto)).Throws<NotFoundException> ();
 
             // Act
             var result = await _usersController.UpdateUser(userId, userUpdateDto);
 
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
-            var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult?.Value.Should().Be("User not found or could not be updated");
         }
 
         [Fact]
@@ -216,8 +211,8 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             var userId = Guid.NewGuid();
             var players = new List<Player>
             {
-                new Player { Id = Guid.NewGuid(), UserId = userId, Name = "Player1" },
-                new Player { Id = Guid.NewGuid(), UserId = userId, Name = "Player2" }
+                new() { Id = Guid.NewGuid(), UserId = userId, Name = "Player1" },
+                new() { Id = Guid.NewGuid(), UserId = userId, Name = "Player2" }
             };
             A.CallTo(() => _playerRepository.GetPlayersByUserIdAsync(userId)).Returns(players);
 

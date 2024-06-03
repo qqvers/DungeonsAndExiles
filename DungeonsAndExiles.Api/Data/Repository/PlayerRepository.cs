@@ -4,6 +4,7 @@ using DungeonsAndExiles.Api.DTOs.Player;
 using DungeonsAndExiles.Api.Exceptions;
 using DungeonsAndExiles.Api.Models.Domain;
 using DungeonsAndExiles.Api.Services;
+using DungeonsAndExiles.Api.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
@@ -46,7 +47,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             _logger = logger;
         }
 
-        public async Task<bool> AddItemToBackpackAsync(Guid playerId, Guid itemId)
+        public async Task AddItemToBackpackAsync(Guid playerId, Guid itemId)
         {
             _logger.LogInformation("Attempting to add item with ID {ItemId} to backpack for player with ID {PlayerId}", itemId, playerId);
 
@@ -60,7 +61,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
             await _appDbContext.SaveChangesAsync();
 
             _logger.LogInformation("Successfully added item with ID {ItemId} to backpack for player with ID {PlayerId}", itemId, playerId);
-            return true;
         }
 
         public async Task<Player> CreatePlayerAsync(PlayerDto playerDto, Guid userId)
@@ -102,26 +102,19 @@ namespace DungeonsAndExiles.Api.Data.Repository
             return player;
         }
 
-        public async Task<bool> DeletePlayerAsync(Guid playerId)
+        public async Task DeletePlayerAsync(Guid playerId)
         {
             _logger.LogInformation("Attempting to delete player with ID {PlayerId}", playerId);
 
-            var user = await _appDbContext.Players.FindAsync(playerId);
-
-            if (user == null)
-            {
-                _logger.LogWarning("Player with ID {PlayerId} not found", playerId);
-                return false;
-            }
+            var user = await GetPlayerByIdAsync(playerId);
 
             _appDbContext.Players.Remove(user);
             await _appDbContext.SaveChangesAsync();
 
             _logger.LogInformation("Player with ID {PlayerId} deleted successfully", playerId);
-            return true;
         }
 
-        public async Task<bool> EquipItemAsync(Guid playerId, Guid itemId)
+        public async Task EquipItemAsync(Guid playerId, Guid itemId)
         {
             _logger.LogInformation("Attempting to equip item with ID {ItemId} for player with ID {PlayerId}", itemId, playerId);
 
@@ -141,13 +134,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             }
 
             var currentEquippedItem = equipment.Items.FirstOrDefault(i => i.Type == item!.Type);
-            var currentItemInBackpack = backpack.Items.FirstOrDefault(i => i.Id == itemId);
-
-            if (currentItemInBackpack == null)
-            {
-                throw new NotFoundException($"Item with ID {itemId} not found in backpack.");
-            }
-
+            var currentItemInBackpack = backpack.Items.FirstOrDefault(i => i.Id == itemId) ?? throw new NotFoundException($"Item with ID {itemId} not found in backpack.");
             if (currentEquippedItem == null)
             {
                 backpack.Items.Remove(currentItemInBackpack);
@@ -166,7 +153,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
             await _appDbContext.SaveChangesAsync();
 
             _logger.LogInformation("Item with ID {ItemId} equipped successfully for player with ID {PlayerId}", itemId, playerId);
-            return true;
         }
 
         public async Task<bool> CombatWithMonsterAsync(Guid playerId, Guid monsterId, CancellationToken cancellationToken)
@@ -234,22 +220,21 @@ namespace DungeonsAndExiles.Api.Data.Repository
                     await _itemRepository.AddItemToBackpack(player.BackpackId, dropResult.Id);
                 }
             }
+            else
+            {
+                return false;
+            }
 
             await _appDbContext.SaveChangesAsync(CancellationToken.None);
             _logger.LogInformation("Combat between player with ID {PlayerId} and monster with ID {MonsterId} completed. Result: {Result}", playerId, monsterId, combatResult);
-            return combatResult;
+            return true;
         }
 
         public async Task<Player> GetPlayerByIdAsync(Guid playerId)
         {
             _logger.LogInformation("Attempting to find player with ID {PlayerId}", playerId);
 
-            var player = await _appDbContext.Players.FindAsync(playerId);
-
-            if (player == null)
-            {
-                throw new NotFoundException($"Player with ID {playerId} not found.");
-            }
+            var player = await _appDbContext.Players.FindAsync(playerId) ?? throw new NotFoundException($"Player with ID {playerId} not found.");
             _logger.LogInformation("Player with ID {PlayerId} successfully found.", playerId);
             return player;
         }
@@ -260,10 +245,11 @@ namespace DungeonsAndExiles.Api.Data.Repository
 
             var playerList = await _appDbContext.Players.ToListAsync();
 
+            _logger.LogInformation("List of all players successfully retrieved.");
             return playerList;
         }
 
-        public async Task<bool> RemoveItemFromBackpackAsync(Guid playerId, Guid itemId)
+        public async Task RemoveItemFromBackpackAsync(Guid playerId, Guid itemId)
         {
             _logger.LogInformation("Attempting to remove item with ID {ItemId} from backpack for player with ID {PlayerId}", itemId, playerId);
 
@@ -271,26 +257,14 @@ namespace DungeonsAndExiles.Api.Data.Repository
             var item = await _itemRepository.GetItemById(itemId);
             var backpack = await _appDbContext.Backpacks
                 .Include(b => b.Items)
-                .FirstOrDefaultAsync(b => b.Id == player.BackpackId);
-
-            if (backpack == null)
-            {
-                throw new NotFoundException($"Backpack with ID {player.BackpackId} not found.");
-            }
-
-            var itemInBackpack = backpack.Items.FirstOrDefault(i => i.Id == itemId);
-            if (itemInBackpack == null)
-            {
-                throw new NotFoundException($"Item with ID {itemId} not found in backpack with ID {backpack.Id}");
-            }
-
+                .FirstOrDefaultAsync(b => b.Id == player.BackpackId) ?? throw new NotFoundException($"Backpack with ID {player.BackpackId} not found.");
+            var itemInBackpack = backpack.Items.FirstOrDefault(i => i.Id == itemId) ?? throw new NotFoundException($"Item with ID {itemId} not found in backpack with ID {backpack.Id}");
             backpack.Items.Remove(itemInBackpack);
 
             _appDbContext.Backpacks.Update(backpack);
             await _appDbContext.SaveChangesAsync();
 
             _logger.LogInformation("Item with ID {ItemId} removed successfully from backpack for player with ID {PlayerId}", itemId, playerId);
-            return true;
         }
 
         public async Task<Player> UpdatePlayerAsync(Guid playerId, PlayerUpdateDto playerUpdateDto)
@@ -307,7 +281,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             return newUser;
         }
 
-        public async Task<List<Item>> GetPlayerEquipmentItemsListAsync(Guid playerId)
+        public async Task<List<Item>?> GetPlayerEquipmentItemsListAsync(Guid playerId)
         {
             _logger.LogInformation("Attempting to retrieve equipment items list for player with ID {PlayerId}", playerId);
 
@@ -324,15 +298,10 @@ namespace DungeonsAndExiles.Api.Data.Repository
                 })
                 .ToListAsync();
 
-            if (equipmentItems == null)
-            {
-                throw new NotFoundException($"Equipment for player with ID {playerId} not found.");
-            }
-
             return equipmentItems;
         }
 
-        public async Task<List<Item>> GetPlayerBackpackItemsListAsync(Guid playerId)
+        public async Task<List<Item>?> GetPlayerBackpackItemsListAsync(Guid playerId)
         {
             _logger.LogInformation("Attempting to retrieve backpack items list for player with ID {PlayerId}", playerId);
 
@@ -348,12 +317,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
                     Defence = i.Defence
                 })
                 .ToListAsync();
-
-            if (backpackItems == null)
-            {
-                throw new NotFoundException($"Backpack for player with ID {playerId} not found.");
-            }
-
             return backpackItems;
         }
 

@@ -45,9 +45,9 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             return new List<Monster>
             {
-                new Monster { Id = Guid.NewGuid(), Name = "Monster1", Level = 1,Health = 1,Defence = 1, Damage = 10 },
-                new Monster { Id = Guid.NewGuid(), Name = "Monster2", Level = 2,Health = 1,Defence = 1, Damage = 30 },
-                new Monster { Id = Guid.NewGuid(), Name = "Monster3", Level = 3,Health = 1,Defence = 1, Damage = 50 },
+                new() { Id = Guid.NewGuid(), Name = "Monster1", Level = 1,Health = 1,Defence = 1, Damage = 10 },
+                new() { Id = Guid.NewGuid(), Name = "Monster2", Level = 2,Health = 1,Defence = 1, Damage = 30 },
+                new() { Id = Guid.NewGuid(), Name = "Monster3", Level = 3,Health = 1,Defence = 1, Damage = 50 },
             };
         }
     }

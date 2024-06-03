@@ -76,13 +76,11 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <returns>A list of players</returns>
         /// <response code="200">Returns the list of players</response>
-        /// <response code="404">If no players are found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -278,11 +276,9 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <param name="playerId">The ID of the player</param>
         /// <returns>The list of items in the player's backpack</returns>
         /// <response code="200">Returns the list of items</response>
-        /// <response code="404">If no items are found in the backpack</response>
         /// <response code="500">If there was an internal server error</response>
         [HttpGet("{playerId:Guid}/backpacks/items")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetPlayerBackpackItems([FromRoute] Guid playerId)
         {
@@ -293,13 +289,7 @@ namespace DungeonsAndExiles.Api.Controllers
                 var itemList = await _playerRepository.GetPlayerBackpackItemsListAsync(playerId);
                 var itemVMList = _mapper.Map<List<ItemVM>>(itemList);
                 return Ok(itemVMList);
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Backpack items not found for player with ID {PlayerId}", playerId);
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
+            }catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal server error while getting backpack items for player with ID {PlayerId}", playerId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
@@ -312,11 +302,9 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <param name="playerId">The ID of the player</param>
         /// <returns>The list of items in the player's equipment</returns>
         /// <response code="200">Returns the list of items</response>
-        /// <response code="404">If no items are found in the equipment</response>
         /// <response code="500">If there was an internal server error</response>
         [HttpGet("{playerId:Guid}/equipments/items")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetPlayerEquipmentItems([FromRoute] Guid playerId)
         {
@@ -327,11 +315,6 @@ namespace DungeonsAndExiles.Api.Controllers
                 var itemList = await _playerRepository.GetPlayerEquipmentItemsListAsync(playerId);
                 var itemVMList = _mapper.Map<List<ItemVM>>(itemList);
                 return Ok(itemVMList);
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Equipment items not found for player with ID {PlayerId}", playerId);
-                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {

@@ -2,6 +2,7 @@
 {
     public class PlayerCombatValidationException : Exception
     {
+        public PlayerCombatValidationException() { }
         public PlayerCombatValidationException(string message) : base(message)
         {
         }

@@ -52,11 +52,7 @@ namespace DungeonsAndExiles.Api.Controllers
             try
             {
                 var item = await _itemRepository.GetItemById(itemId);
-                if (item == null)
-                {
-                    _logger.LogWarning("Item with ID {ItemId} not found", itemId);
-                    return NotFound(new { message = $"Item with ID {itemId} not found." });
-                }
+
                 var itemVM = _mapper.Map<ItemVM>(item);
                 _logger.LogInformation("Item with ID {ItemId} retrieved successfully", itemId);
                 return Ok(itemVM);

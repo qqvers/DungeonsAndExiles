@@ -51,7 +51,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         public async Task GetPlayersList_ReturnsOkResult_WithPlayersList()
         {
             // Arrange
-            var playersList = new List<Player> { new Player { Id = Guid.NewGuid() } };
+            var playersList = new List<Player> { new() { Id = Guid.NewGuid() } };
             A.CallTo(() => _playerRepository.GetPlayerListAsync()).Returns(Task.FromResult<List<Player>?>(playersList));
             var playersListVM = _mapper.Map<List<PlayerVM>>(playersList);
 
@@ -145,7 +145,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var playerId = Guid.NewGuid();
-            var itemsList = new List<Item> { new Item { Id = Guid.NewGuid() } };
+            var itemsList = new List<Item> { new() { Id = Guid.NewGuid() } };
             A.CallTo(() => _playerRepository.GetPlayerBackpackItemsListAsync(playerId)).Returns(Task.FromResult(itemsList));
             var itemsListVM = _mapper.Map<List<Item>>(itemsList);
 
@@ -162,7 +162,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         {
             // Arrange
             var playerId = Guid.NewGuid();
-            var itemsList = new List<Item> { new Item { Id = Guid.NewGuid() } };
+            var itemsList = new List<Item> { new() { Id = Guid.NewGuid() } };
             A.CallTo(() => _playerRepository.GetPlayerEquipmentItemsListAsync(playerId)).Returns(Task.FromResult(itemsList));
             var itemsListVM = _mapper.Map<List<Item>>(itemsList);
 

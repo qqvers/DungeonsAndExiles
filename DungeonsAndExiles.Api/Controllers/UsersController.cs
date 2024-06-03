@@ -122,13 +122,8 @@ namespace DungeonsAndExiles.Api.Controllers
                 }
 
                 var user = await _userRepository.FindUserInDatabase(userLoginDto);
-                if (user == null)
-                {
-                    _logger.LogWarning("User with email {Email} not found", userLoginDto.Email);
-                    return NotFound("Provided email does not exist in database");
-                }
 
-                if (!BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.Password))
+                if (!BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user!.Password))
                 {
                     _logger.LogWarning("Incorrect password for user with email {Email}", userLoginDto.Email);
                     return Unauthorized("Incorrect password");
@@ -147,6 +142,10 @@ namespace DungeonsAndExiles.Api.Controllers
 
                 _logger.LogInformation("User with email {Email} logged in successfully", userLoginDto.Email);
                 return Ok(new { User = userVM, Token = token, RefreshToken = refreshToken });
+            }catch(NotFoundException ex)
+            {
+                _logger.LogWarning("User with email {Email} not found", userLoginDto.Email);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -187,15 +186,15 @@ namespace DungeonsAndExiles.Api.Controllers
                 }
 
                 var user = await _userRepository.FindUserByIdAsync(userId);
-                if (user == null)
-                {
-                    _logger.LogWarning("User with ID {UserId} not found", userId);
-                    return NotFound("User with that Id does not exist");
-                }
 
                 var userVM = _mapper.Map<UserVM>(user);
                 _logger.LogInformation("User with ID {UserId} retrieved successfully", userId);
                 return Ok(userVM);
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning("User with ID {UserId} not found", userId);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -241,15 +240,15 @@ namespace DungeonsAndExiles.Api.Controllers
                     return BadRequest("Id cannot be empty");
                 }
 
-                bool isUpdated = await _userRepository.UpdateUserAsync(userId, updatedUser);
-                if (!isUpdated)
-                {
-                    _logger.LogWarning("User with ID {UserId} not found or could not be updated", userId);
-                    return NotFound("User not found or could not be updated");
-                }
+                await _userRepository.UpdateUserAsync(userId, updatedUser);
 
                 _logger.LogInformation("User with ID {UserId} updated successfully", userId);
                 return Ok("User updated");
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning("User with ID {UserId} not found or could not be updated", userId);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -396,6 +395,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="401">If the refresh token is invalid or expired</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="404">If no player is found</response>
         [HttpPost("{userId:Guid}/refresh")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -403,6 +403,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Refresh([FromRoute] Guid userId, [FromBody] RefreshModel model)
         {
             _logger.LogInformation("Refresh called");
@@ -416,7 +417,7 @@ namespace DungeonsAndExiles.Api.Controllers
             {
             var user = await _userRepository.FindUserByIdAsync(userId);
 
-            if (user is null || user.RefreshToken != model.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
+            if (user!.RefreshToken != model.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
                 return Unauthorized();
 
             var role = await _userRepository.GetUserRole(user.RoleId);
@@ -427,11 +428,15 @@ namespace DungeonsAndExiles.Api.Controllers
             return Ok(new
             {
                 JwtToken = tokenResult.Token,
-                Expiration = tokenResult.Expiration,
-                RefreshToken = model.RefreshToken
+                tokenResult.Expiration,
+                model.RefreshToken
             });
 
-            }catch (Exception ex)
+            }
+            catch(NotFoundException ex) {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal server error while refreshing token for user with ID {UserId}", userId);
                 return StatusCode(500, $"Internal server error: {ex.Message}");

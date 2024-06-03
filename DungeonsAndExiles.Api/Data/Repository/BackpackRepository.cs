@@ -18,7 +18,7 @@ namespace DungeonsAndExiles.Api.Data.Repository
             _logger = logger;
         }
 
-        public async Task<bool> FindItemInBackpackByIdAsync(Guid backpackId, Guid itemId)
+        public async Task FindItemInBackpackByIdAsync(Guid backpackId, Guid itemId)
         {
             _logger.LogInformation($"Attempting to find item in backpack");
 
@@ -31,7 +31,6 @@ namespace DungeonsAndExiles.Api.Data.Repository
             }
 
             _logger.LogInformation($"Item successfully found in backpack");
-            return true;
         }
 
         public async Task<Backpack> GetBackpackByIdAsync(Guid backpackId)
