@@ -11,9 +11,12 @@ using DungeonsAndExiles.Api.Services.Jwt;
 using DungeonsAndExiles.Api.ViewModels;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace DungeonsAndExiles.UnitTests.ControllerTests
 {
@@ -26,6 +29,15 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
         private readonly IMapper _mapper;
         private readonly ILogger<UsersController> _logger;
 
+        private readonly Guid _playerId;
+        private readonly Guid _itemId;
+        private readonly Guid _backpackId;
+        private readonly Guid _equipmentId;
+        private readonly Guid _userId;
+        private readonly Guid _roleId;
+        private readonly Player _player;
+        private readonly User _user;
+        private readonly Role _role;
 
         public UsersControllerTests()
         {
@@ -39,6 +51,45 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             _mapper = config.CreateMapper();
             _logger = A.Fake<ILogger<UsersController>>();
             _usersController = new UsersController(_userRepository, _jwtService, _playerRepository, _mapper, _logger);
+
+            _playerId = Guid.NewGuid();
+            _itemId = Guid.NewGuid();
+            _backpackId = Guid.NewGuid();
+            _equipmentId = Guid.NewGuid();
+            _userId = Guid.NewGuid();
+            _roleId = Guid.NewGuid();
+
+            _player = new Player
+            {
+                Id = _playerId,
+                Name = "Player",
+                BackpackId = _backpackId,
+                Damage = 1,
+                Defence = 1,
+                Experience = 0,
+                Health = 100,
+                Level = 1,
+                Stamina = 20,
+                EquipmentId = _equipmentId,
+                UserId = _userId
+            };
+            _user = new User { Id = _userId, Email = "email@email.com", Name = "John", Password = "password", Players = new List<Player>() { _player } };
+            _role = new Role { Id = _roleId, Name = "User" };
+
+            var fakeClaims = new List<Claim>()
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, _user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, _user.Email),
+                new Claim(ClaimTypes.Role, _role.Name)
+            };
+
+            var fakeIdentity = new ClaimsIdentity(fakeClaims, "TestAuthType");
+            var fakeClaimsPrincipal = new ClaimsPrincipal(fakeIdentity);
+
+            _usersController.ControllerContext.HttpContext = new DefaultHttpContext
+            {
+                User = fakeClaimsPrincipal
+            };
         }
 
         [Fact]
@@ -122,40 +173,24 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             result.Should().BeOfType<NotFoundObjectResult>();
         }
 
+
         [Fact]
-        public async Task UpdateUser_ReturnsOk_WhenUserIsUpdated()
+        public async Task UpdateUser_ReturnsForbid_WhenNoClaims()
         {
             // Arrange
             var userId = Guid.NewGuid();
             var userUpdateDto = new UserUpdateDto { Email = "updated@example.com", Password = "UpdatedPassword123" };
-            A.CallTo(() => _userRepository.UpdateUserAsync(userId, userUpdateDto)).Returns(Task.FromResult(true));
+            A.CallTo(() => _userRepository.UpdateUserAsync(userId, userUpdateDto)).Throws<NotFoundException>();
 
             // Act
             var result = await _usersController.UpdateUser(userId, userUpdateDto);
 
             // Assert
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = result as OkObjectResult;
-            okResult?.Value.Should().Be("User updated");
+            result.Should().BeOfType<ForbidResult>();
         }
 
         [Fact]
-        public async Task UpdateUser_ReturnsNotFound_WhenUserDoesNotExist()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var userUpdateDto = new UserUpdateDto { Email = "updated@example.com", Password = "UpdatedPassword123" };
-            A.CallTo(() => _userRepository.UpdateUserAsync(userId, userUpdateDto)).Throws<NotFoundException> ();
-
-            // Act
-            var result = await _usersController.UpdateUser(userId, userUpdateDto);
-
-            // Assert
-            result.Should().BeOfType<NotFoundObjectResult>();
-        }
-
-        [Fact]
-        public async Task DeleteUser_ReturnsNoContent_WhenUserIsDeleted()
+        public async Task DeleteUser_ReturnsForbid_WhenNoClaims()
         {
             // Arrange
             var userId = Guid.NewGuid();
@@ -165,27 +200,11 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             var result = await _usersController.DeleteUser(userId);
 
             // Assert
-            result.Should().BeOfType<NoContentResult>();
+            result.Should().BeOfType<ForbidResult>();
         }
 
         [Fact]
-        public async Task DeleteUser_ReturnsNotFound_WhenUserDoesNotExist()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            A.CallTo(() => _userRepository.DeleteUserAsync(userId)).Returns(Task.FromResult(false));
-
-            // Act
-            var result = await _usersController.DeleteUser(userId);
-
-            // Assert
-            result.Should().BeOfType<NotFoundObjectResult>();
-            var notFoundResult = result as NotFoundObjectResult;
-            notFoundResult?.Value.Should().Be("User not found or could not be deleted");
-        }
-
-        [Fact]
-        public async Task CreatePlayer_ReturnsCreated_WhenPlayerIsCreated()
+        public async Task CreatePlayer_ReturnsForbid_WhenNoClaims()
         {
             // Arrange
             var userId = Guid.NewGuid();
@@ -199,9 +218,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             var result = await _usersController.CreatePlayer(userId, playerDto);
 
             // Assert
-            result.Should().BeOfType<CreatedResult>();
-            var createdResult = result as CreatedResult;
-            createdResult?.Value.Should().BeEquivalentTo(playerVM);
+            result.Should().BeOfType<ForbidResult>();
         }
 
         [Fact]
