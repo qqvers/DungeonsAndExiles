@@ -121,7 +121,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             var result = await _usersController.Login(userLoginDto);
 
             // Assert
-            result.Should().BeOfType<NotFoundObjectResult>();
+            result.Should().BeOfType<UnauthorizedObjectResult>();
         }
 
         [Fact]

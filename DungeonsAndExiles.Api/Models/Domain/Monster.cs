@@ -6,5 +6,6 @@
         public int Health { get; set; }
         public int Defence { get; set; }
         public int Damage { get; set; }
+        public byte[] Image { get; set; } = null!;
     }
 }

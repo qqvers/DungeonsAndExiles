@@ -100,16 +100,16 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <returns>A token and refresh token for the logged in user</returns>
         /// <response code="200">Returns the token and refresh token</response>
         /// <response code="400">If the user login data is invalid</response>
-        /// <response code="404">If the user is not found</response>
         /// <response code="500">If there was an internal server error</response>
+        /// <response code="401">If the user credentials are not valid</response>
         /// <response code="429">If the request limit is exceeded</response>
         [HttpPost("login")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
             _logger.LogInformation("Attempting to log in user with email {Email}", userLoginDto.Email);
@@ -141,11 +141,12 @@ namespace DungeonsAndExiles.Api.Controllers
                 var userVM = _mapper.Map<UserVM>(user);
 
                 _logger.LogInformation("User with email {Email} logged in successfully", userLoginDto.Email);
+
                 return Ok(new { User = userVM, Token = token, RefreshToken = refreshToken });
             }catch(NotFoundException ex)
             {
                 _logger.LogWarning("User with email {Email} not found", userLoginDto.Email);
-                return NotFound(ex.Message);
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {

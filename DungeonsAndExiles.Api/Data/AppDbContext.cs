@@ -117,14 +117,29 @@ namespace DungeonsAndExiles.Api.Data
             );
 
             //monsters
+            var basePath = "wwwroot/images/";
+
+            var gladiatorImage = File.ReadAllBytes(basePath + "gladiator_avatar.png");
+            var deadeyeImage = File.ReadAllBytes(basePath + "deadeye_avatar.png");
+            var assassinImage = File.ReadAllBytes(basePath + "assassin_avatar.png");
+            var occultistImage = File.ReadAllBytes(basePath + "occultist_avatar.png");
+            var elementalistImage = File.ReadAllBytes(basePath + "elementalist_avatar.png");
+            var juggernautImage = File.ReadAllBytes(basePath + "juggernaut_avatar.png");
+            var chieftainImage = File.ReadAllBytes(basePath + "chieftain_avatar.png");
+            var slayerImage = File.ReadAllBytes(basePath + "slayer_avatar.png");
+            var championImage = File.ReadAllBytes(basePath + "champion_avatar.png");
+
             modelBuilder.Entity<Monster>().HasData(
-               new Monster { Id = Guid.NewGuid(), Name = "Witch", Level = 1, Health = 30, Defence = 1, Damage = 5 },
-               new Monster { Id = Guid.NewGuid(), Name = "Deadeye", Level = 5, Health = 50, Defence = 5, Damage = 10 },
-               new Monster { Id = Guid.NewGuid(), Name = "Assassin", Level = 10, Health = 70, Defence = 10, Damage = 20 },
-               new Monster { Id = Guid.NewGuid(), Name = "Occultist", Level = 15, Health = 75, Defence = 15, Damage = 30 },
-               new Monster { Id = Guid.NewGuid(), Name = "Elementalist", Level = 20, Health = 150, Defence = 30, Damage = 40 },
-               new Monster { Id = Guid.NewGuid(), Name = "Juggernaut", Level = 25, Health = 300, Defence = 50, Damage = 100 }
-           );
+                new Monster { Id = Guid.NewGuid(), Name = "Gladiator", Level = 1, Health = 30, Defence = 1, Damage = 5, Image = gladiatorImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Deadeye", Level = 5, Health = 50, Defence = 5, Damage = 10, Image = deadeyeImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Assassin", Level = 10, Health = 70, Defence = 10, Damage = 20, Image = assassinImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Occultist", Level = 15, Health = 75, Defence = 15, Damage = 30, Image = occultistImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Elementalist", Level = 20, Health = 150, Defence = 30, Damage = 40, Image = elementalistImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Juggernaut", Level = 25, Health = 300, Defence = 50, Damage = 100, Image = juggernautImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Chieftain", Level = 30, Health = 150, Defence = 30, Damage = 200, Image = chieftainImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Slayer", Level = 40, Health = 200, Defence = 35, Damage = 300, Image = slayerImage },
+                new Monster { Id = Guid.NewGuid(), Name = "Champion", Level = 50, Health = 300, Defence = 40, Damage = 400, Image = championImage }
+            );
 
         }
     }
