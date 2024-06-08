@@ -60,7 +60,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             var result = await _itemsController.GetItem(nonExistentItemId);
 
             // Assert
-            result.Should().BeOfType<NotFoundObjectResult>();
+            result.Should().BeOfType<NoContentResult>();
         }
 
         [Fact]

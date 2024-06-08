@@ -40,13 +40,13 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <param name="playerId">The ID of the player</param>
         /// <returns>The requested player</returns>
         /// <response code="200">Returns the requested player</response>
-        /// <response code="404">If the player is not found</response>
+        /// <response code="204">If the no requested data was found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
         [HttpGet("{playerId:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -62,8 +62,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Player with ID {PlayerId} not found", playerId);
-                return NotFound(ex.Message);
+                _logger.LogInformation(ex, "Player with ID {PlayerId} not found", playerId);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -111,15 +111,13 @@ namespace DungeonsAndExiles.Api.Controllers
         /// Deletes a player by their ID.
         /// </summary>
         /// <param name="playerId">The ID of the player to delete</param>
-        /// <response code="204">If the player is successfully deleted</response>
-        /// <response code="404">If the player is not found</response>
+        /// <response code="204">If the player is successfully deleted or not found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
         /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpDelete("{playerId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -143,8 +141,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Player with ID {PlayerId} not found", playerId);
-                return NotFound(ex.Message);
+                _logger.LogInformation(ex, "Player with ID {PlayerId} not found", playerId);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -158,15 +156,13 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <param name="playerId">The ID of the player</param>
         /// <param name="itemId">The ID of the item to delete</param>
-        /// <response code="204">If the item is successfully deleted</response>
-        /// <response code="404">If the item is not found in the player's backpack</response>
+        /// <response code="204">If the item is successfully deleted or not found in backpack</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
         /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpDelete("{playerId:Guid}/backpacks/items/{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -190,8 +186,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Item with ID {ItemId} not found in backpack for player with ID {PlayerId}", itemId, playerId);
-                return NotFound(ex.Message);
+                _logger.LogInformation(ex, "Item with ID {ItemId} not found in backpack for player with ID {PlayerId}", itemId, playerId);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -205,15 +201,13 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <param name="playerId">The ID of the player</param>
         /// <param name="itemId">The ID of the item to equip</param>
-        /// <response code="204">If the item is successfully equipped</response>
-        /// <response code="404">If the item is not found for the player</response>
+        /// <response code="204">If the item is successfully equipped or not found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
         /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
         [HttpPost("{playerId:Guid}/items/{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -237,8 +231,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Item with ID {ItemId} not found for player with ID {PlayerId}", itemId, playerId);
-                return NotFound(ex.Message);
+                _logger.LogInformation(ex, "Item with ID {ItemId} not found for player with ID {PlayerId}", itemId, playerId);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -255,7 +249,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <param name="cancellationToken">Token to cancel the operation</param>
         /// <returns>Result of the combat</returns>
         /// <response code="200">If the combat result is successfully returned</response>
-        /// <response code="404">If the player or monster is not found</response>
+        /// <response code="204">If the player or monster is not found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
@@ -301,8 +295,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Monster with ID {MonsterId} not found for player with ID {PlayerId}", monsterId, playerId);
-                return NotFound(ex.Message);
+                _logger.LogInformation(ex, "Monster with ID {MonsterId} not found for player with ID {PlayerId}", monsterId, playerId);
+                return NoContent();
             }
             catch (Exception ex)
             {

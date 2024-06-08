@@ -36,16 +36,16 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <param name="itemId">The ID of the item</param>
         /// <returns>The requested item</returns>
         /// <response code="200">Returns the requested item</response>
-        /// <response code="404">If the item is not found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
+        /// <response code="204">If the no requested data was found</response>
         [HttpGet("{itemId:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> GetItem([FromRoute] Guid itemId)
         {
             _logger.LogInformation("Attempting to get item with ID {ItemId}", itemId);
@@ -59,8 +59,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Item with ID {ItemId} not found", itemId);
-                return NotFound(new { message = ex.Message });
+                _logger.LogInformation(ex, "Item with ID {ItemId} not found", itemId);
+                return NoContent();
             }
             catch (Exception ex)
             {

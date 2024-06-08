@@ -170,7 +170,7 @@ namespace DungeonsAndExiles.UnitTests.ControllerTests
             var result = await _usersController.GetUserById(userId);
 
             // Assert
-            result.Should().BeOfType<NotFoundObjectResult>();
+            result.Should().BeOfType<NoContentResult>();
         }
 
 

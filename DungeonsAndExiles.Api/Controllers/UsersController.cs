@@ -163,7 +163,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <returns>The user with the specified ID</returns>
         /// <response code="200">Returns the user</response>
         /// <response code="400">If the user ID is invalid</response>
-        /// <response code="404">If the user is not found</response>
+        /// <response code="204">If the user is not found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
@@ -171,7 +171,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -194,8 +194,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning("User with ID {UserId} not found", userId);
-                return NotFound(ex.Message);
+                _logger.LogInformation("User with ID {UserId} not found", userId);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -212,7 +212,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <returns>A message indicating the result of the update</returns>
         /// <response code="200">Returns a message indicating the user was updated</response>
         /// <response code="400">If the user update data is invalid</response>
-        /// <response code="404">If the user is not found</response>
+        /// <response code="204">If the user is not found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
@@ -221,7 +221,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -257,8 +257,8 @@ namespace DungeonsAndExiles.Api.Controllers
             }
             catch (NotFoundException ex)
             {
-                _logger.LogWarning("User with ID {UserId} not found or could not be updated", userId);
-                return NotFound(ex.Message);
+                _logger.LogInformation("User with ID {UserId} not found or could not be updated", userId);
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -272,9 +272,8 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <param name="userId">The ID of the user to delete</param>
         /// <returns>No content</returns>
-        /// <response code="204">If the user was deleted successfully</response>
+        /// <response code="204">If the user was deleted successfully or not found</response>
         /// <response code="400">If the user ID is invalid</response>
-        /// <response code="404">If the user is not found</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
@@ -283,7 +282,6 @@ namespace DungeonsAndExiles.Api.Controllers
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -314,6 +312,11 @@ namespace DungeonsAndExiles.Api.Controllers
                 }
 
                 _logger.LogInformation("User with ID {UserId} deleted successfully", userId);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogInformation(ex.Message);
                 return NoContent();
             }
             catch (Exception ex)
@@ -378,7 +381,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <returns>A list of players for the user</returns>
         /// <response code="200">Returns the list of players</response>
         /// <response code="400">If the user ID is invalid</response>
-        /// <response code="404">If no players are found for the user</response>
+        /// <response code="204">If no players are found for the user</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
@@ -386,7 +389,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -412,6 +415,11 @@ namespace DungeonsAndExiles.Api.Controllers
                 _logger.LogInformation("List of players for user with ID {UserId} retrieved successfully", userId);
                 return Ok(listOfUserPlayersM);
             }
+            catch (NotFoundException ex)
+            {
+                _logger.LogInformation(ex.Message);
+                return NoContent();
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal server error while getting list of players for user with ID {UserId}", userId);
@@ -430,7 +438,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="401">If the refresh token is invalid or expired</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="429">If the request limit is exceeded</response>
-        /// <response code="404">If no player is found</response>
+        /// <response code="204">If no player is found</response>
         [HttpPost("{userId:Guid}/refresh")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -438,7 +446,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> Refresh([FromRoute] Guid userId, [FromBody] RefreshModel model)
         {
             _logger.LogInformation("Refresh called");
@@ -469,7 +477,8 @@ namespace DungeonsAndExiles.Api.Controllers
 
             }
             catch(NotFoundException ex) {
-                return NotFound(ex.Message);
+                _logger.LogInformation(ex.Message);
+                return NoContent();
             }
             catch (Exception ex)
             {
