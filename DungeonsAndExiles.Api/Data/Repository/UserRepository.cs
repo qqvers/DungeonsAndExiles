@@ -96,6 +96,12 @@ namespace DungeonsAndExiles.Api.Data.Repository
                 throw new InvalidOperationException("Selected email is taken by other user");
             }
 
+            if (currentUser.Email == "john@doe.com")
+            {
+                _logger.LogWarning("Demo user can not be deleted");
+                throw new NotSupportedException($"Demo user can not be deleted");
+            }
+
             userUpdateDto.Password = BCrypt.Net.BCrypt.HashPassword(userUpdateDto.Password);
             _mapper.Map(userUpdateDto, currentUser);
 
@@ -114,6 +120,11 @@ namespace DungeonsAndExiles.Api.Data.Repository
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found", userId);
+                return false;
+            }
+            if (user.Email == "john@doe.com")
+            {
+                _logger.LogWarning("Demo user can not be deleted");
                 return false;
             }
 

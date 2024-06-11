@@ -217,6 +217,7 @@ namespace DungeonsAndExiles.Api.Controllers
         /// <response code="401">If the user is unauthorized</response>
         /// <response code="429">If the request limit is exceeded</response>
         /// <response code="403">If the authenticated user does not have permission to update the specified user's data</response>
+        /// <response code="405">If the request tries to delete demo user</response>
         [HttpPut("{userId:Guid}")]
         [Authorize(Policy = "SignedInOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -226,6 +227,7 @@ namespace DungeonsAndExiles.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid userId, [FromBody] UserUpdateDto updatedUser)
         {
             _logger.LogInformation("Attempting to update user with ID {UserId}", userId);
@@ -259,6 +261,10 @@ namespace DungeonsAndExiles.Api.Controllers
             {
                 _logger.LogInformation("User with ID {UserId} not found or could not be updated", userId);
                 return NoContent();
+            }catch(NotSupportedException ex)
+            {
+                _logger.LogInformation(ex.Message);
+                return StatusCode(405, "Updating demo user is not allowed");
             }
             catch (Exception ex)
             {
@@ -272,7 +278,8 @@ namespace DungeonsAndExiles.Api.Controllers
         /// </summary>
         /// <param name="userId">The ID of the user to delete</param>
         /// <returns>No content</returns>
-        /// <response code="204">If the user was deleted successfully or not found</response>
+        /// <response code="200">If the user not found or could not be deleted</response>
+        /// <response code="204">If the user was deleted</response>
         /// <response code="400">If the user ID is invalid</response>
         /// <response code="500">If there was an internal server error</response>
         /// <response code="401">If the user is unauthorized</response>
@@ -308,15 +315,10 @@ namespace DungeonsAndExiles.Api.Controllers
                 if (!isDeleted)
                 {
                     _logger.LogWarning("User with ID {UserId} not found or could not be deleted", userId);
-                    return NotFound("User not found or could not be deleted");
+                    return Ok("User not found or could not be deleted");
                 }
 
                 _logger.LogInformation("User with ID {UserId} deleted successfully", userId);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.LogInformation(ex.Message);
                 return NoContent();
             }
             catch (Exception ex)
@@ -407,8 +409,8 @@ namespace DungeonsAndExiles.Api.Controllers
                 var listOfUserPlayers = await _playerRepository.GetPlayersByUserIdAsync(userId);
                 if (listOfUserPlayers == null || !listOfUserPlayers.Any())
                 {
-                    _logger.LogWarning("No players found for user with ID {UserId}", userId);
-                    return NotFound($"No players found for user with ID {userId}.");
+                    _logger.LogInformation("No players found for user with ID {UserId}", userId);
+                    return NoContent();
                 }
 
                 var listOfUserPlayersM = _mapper.Map<List<PlayerVM>>(listOfUserPlayers);
